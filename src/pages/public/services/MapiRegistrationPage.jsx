@@ -1,0 +1,349 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Phone, Mail, Lock, Eye, EyeOff, MapPin, Upload, CheckCircle2, ChevronRight, ChevronLeft, FileText, Leaf } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
+import { saveApplication, generateAppId } from '../../../utils/storage';
+import { useLanguage } from '../../../context/LanguageContext';
+
+const STATES = ['Bihar', 'Jharkhand', 'Uttar Pradesh', 'West Bengal', 'Other'];
+const DISTRICTS_BIHAR = ['Araria','Arwal','Aurangabad','Banka','Begusarai','Bhagalpur','Bhojpur','Buxar','Darbhanga','East Champaran','Gaya','Gopalganj','Jamui','Jehanabad','Kaimur','Katihar','Khagaria','Kishanganj','Lakhisarai','Madhepura','Madhubani','Munger','Muzaffarpur','Nalanda','Nawada','Patna','Purnia','Rohtas','Saharsa','Samastipur','Saran','Sheikhpura','Sheohar','Sitamarhi','Siwan','Supaul','Vaishali','West Champaran'];
+
+const STEPS = [
+  { id: 1, title: 'Personal Details', icon: User },
+  { id: 2, title: 'Location Details', icon: MapPin },
+  { id: 3, title: 'Documents & Submit', icon: Upload },
+];
+
+function StepIndicator({ currentStep }) {
+  return (
+    <div className="flex items-center justify-center gap-2 mb-8">
+      {STEPS.map((step, idx) => {
+        const Icon = step.icon;
+        const isDone = currentStep > step.id;
+        const isActive = currentStep === step.id;
+        return (
+          <div key={step.id} className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+              isDone ? 'bg-brand-green text-white' :
+              isActive ? 'bg-brand-green text-white shadow-lg scale-105' :
+              'bg-gray-100 text-gray-400'
+            }`}>
+              {isDone ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+              <span className="hidden sm:inline">{step.title}</span>
+              <span className="sm:hidden">{step.id}</span>
+            </div>
+            {idx < STEPS.length - 1 && (
+              <div className={`h-0.5 w-6 rounded ${currentStep > step.id ? 'bg-brand-green' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function FormField({ label, required, children }) {
+  return (
+    <div>
+      <label className="label">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+      {children}
+    </div>
+  );
+}
+
+export default function MapiRegistrationPage() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const [step, setStep] = useState(1);
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [successId, setSuccessId] = useState('');
+
+  const [form, setForm] = useState({
+    name: '', mobile: '', email: '', password: '', confirmPassword: '',
+    fatherName: '', state: 'Bihar', district: '', panchayat: '',
+    policeStation: '', village: '', wardName: '', mojaName: '', khataNumber: '', blockName: '', pincode: '',
+    aadhaarFront: null, aadhaarBack: null, landDocument: null,
+  });
+
+  const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
+
+  const validateStep1 = () => {
+    if (!form.name.trim()) return 'Full name is required';
+    if (!/^\d{10}$/.test(form.mobile)) return 'Enter a valid 10-digit mobile number';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Enter a valid email address';
+    if (form.password.length < 6) return 'Password must be at least 6 characters';
+    if (form.password !== form.confirmPassword) return 'Passwords do not match';
+    if (!form.fatherName.trim()) return "Father/Husband name is required";
+    return '';
+  };
+
+  const validateStep2 = () => {
+    if (!form.district) return 'Please select a district';
+    if (!form.village.trim()) return 'Village/Town/Nagar is required';
+    if (!form.blockName.trim()) return 'Block Name is required';
+    if (!/^\d{6}$/.test(form.pincode)) return 'Pincode must be 6 digits';
+    return '';
+  };
+
+  const validateStep3 = () => {
+    if (!form.aadhaarFront) return 'Please upload Aadhaar Front';
+    if (!form.aadhaarBack) return 'Please upload Aadhaar Back';
+    if (!form.landDocument) return 'Please upload Land Document';
+    return '';
+  };
+
+  const nextStep = () => {
+    let err = '';
+    if (step === 1) err = validateStep1();
+    if (step === 2) err = validateStep2();
+    if (err) { setError(err); return; }
+    setError('');
+    setStep(s => s + 1);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSubmit = async () => {
+    const err = validateStep3();
+    if (err) { setError(err); return; }
+    setError('');
+    setSubmitting(true);
+    try {
+      const { appId } = register({
+        name: form.name, email: form.email, password: form.password,
+        mobile: form.mobile, fatherName: form.fatherName,
+        district: form.district, state: form.state,
+      });
+      const finalAppId = generateAppId('MAPI');
+      saveApplication('mapi', {
+        appId: finalAppId,
+        userId: null, // will be set after register returns
+        name: form.name, mobile: form.mobile, email: form.email,
+        fatherName: form.fatherName, state: form.state, district: form.district,
+        panchayat: form.panchayat, policeStation: form.policeStation,
+        village: form.village, wardName: form.wardName, mojaName: form.mojaName, khataNumber: form.khataNumber,
+        blockName: form.blockName, pincode: form.pincode,
+        status: 'submitted', remark: '',
+        statusHistory: [],
+        documents: { aadhaarFront: form.aadhaarFront?.name, aadhaarBack: form.aadhaarBack?.name, landDocument: form.landDocument?.name },
+      });
+      setSuccessId(finalAppId);
+      setTimeout(() => navigate('/customer/dashboard'), 2500);
+    } catch (e) {
+      setError(e.message || 'Registration failed. Please try again.');
+    }
+    setSubmitting(false);
+  };
+
+  if (successId) {
+    return (
+      <div className="min-h-screen bg-brand-cream flex items-center justify-center p-4">
+        <div className="card max-w-md w-full text-center p-10 animate-fade-in">
+          <div className="w-20 h-20 bg-brand-green-pale rounded-full flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 className="w-10 h-10 text-brand-green" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-text mb-2">Registration Successful!</h2>
+          <p className="text-brand-text-muted mb-4">Your Mapi application has been submitted.</p>
+          <div className="bg-brand-green-pale rounded-2xl p-4 mb-6">
+            <p className="text-xs text-brand-text-muted mb-1">Application ID</p>
+            <p className="text-xl font-bold text-brand-green font-mono">{successId}</p>
+          </div>
+          <p className="text-sm text-brand-text-muted">Redirecting to your dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-cream py-10 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 mb-6">
+            <img src="/logo.png" alt="SP MAPI" className="w-9 h-9 rounded-xl object-contain" />
+            <span className="font-bold text-brand-text text-xl">SP MAPI</span>
+          </Link>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-green-pale text-brand-green rounded-full text-xs font-semibold mb-4">
+            <Leaf className="w-3.5 h-3.5" /> Mapi Registration
+          </div>
+          <h1 className="text-3xl font-bold text-brand-text">Mapi (Land Measurement) Registration</h1>
+          <p className="text-brand-text-muted mt-2">Complete all steps to submit your application</p>
+        </div>
+
+        <StepIndicator currentStep={step} />
+
+        <div className="card p-8">
+          {/* Error */}
+          {error && (
+            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-start gap-2">
+              <span className="text-lg leading-none">⚠️</span> {error}
+            </div>
+          )}
+
+          {/* Step 1 — Personal Details */}
+          {step === 1 && (
+            <div className="space-y-5 animate-fade-in">
+              <h2 className="text-xl font-bold text-brand-text mb-6 flex items-center gap-2">
+                <User className="w-5 h-5 text-brand-green" /> Personal Details
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <FormField label="Full Name" required>
+                  <input className="input" placeholder="Enter your full name" value={form.name} onChange={e => set('name', e.target.value)} />
+                </FormField>
+                <FormField label="Mobile Number" required>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                    <input className="input pl-10" placeholder="10-digit mobile" value={form.mobile} onChange={e => set('mobile', e.target.value)} maxLength={10} />
+                  </div>
+                </FormField>
+                <FormField label="Email Address" required>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                    <input className="input pl-10" type="email" placeholder="your@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
+                  </div>
+                </FormField>
+                <FormField label="Father / Husband Name" required>
+                  <input className="input" placeholder="Father or Husband's name" value={form.fatherName} onChange={e => set('fatherName', e.target.value)} />
+                </FormField>
+                <FormField label="Password" required>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                    <input className="input pl-10 pr-10" type={showPwd ? 'text' : 'password'} placeholder="Min 6 characters" value={form.password} onChange={e => set('password', e.target.value)} />
+                    <button type="button" onClick={() => setShowPwd(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted hover:text-brand-green">
+                      {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </FormField>
+                <FormField label="Confirm Password" required>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                    <input className="input pl-10 pr-10" type={showConfirm ? 'text' : 'password'} placeholder="Repeat password" value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)} />
+                    <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-text-muted hover:text-brand-green">
+                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </FormField>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 — Location Details */}
+          {step === 2 && (
+            <div className="space-y-5 animate-fade-in">
+              <h2 className="text-xl font-bold text-brand-text mb-6 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-brand-green" /> Location Details
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <FormField label="State" required>
+                  <select className="input" value={form.state} onChange={e => set('state', e.target.value)}>
+                    {STATES.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </FormField>
+                <FormField label="District" required>
+                  <select className="input" value={form.district} onChange={e => set('district', e.target.value)}>
+                    <option value="">-- Select District --</option>
+                    {DISTRICTS_BIHAR.map(d => <option key={d}>{d}</option>)}
+                  </select>
+                </FormField>
+                <FormField label="Panchayat">
+                  <input className="input" placeholder="Panchayat name" value={form.panchayat} onChange={e => set('panchayat', e.target.value)} />
+                </FormField>
+                <FormField label="Police Station">
+                  <input className="input" placeholder="Police Station / Thana" value={form.policeStation} onChange={e => set('policeStation', e.target.value)} />
+                </FormField>
+                <FormField label="Village / Town / Nagar" required>
+                  <input className="input" placeholder="Village or Town name" value={form.village} onChange={e => set('village', e.target.value)} />
+                </FormField>
+                <FormField label="Ward Name / Number">
+                  <input className="input" placeholder="Ward name or number" value={form.wardName} onChange={e => set('wardName', e.target.value)} />
+                </FormField>
+                <FormField label="Moja Name / Number">
+                  <input className="input" placeholder="Moja name or number" value={form.mojaName} onChange={e => set('mojaName', e.target.value)} />
+                </FormField>
+                <FormField label="Khata Number">
+                  <input className="input" placeholder="Khata number" value={form.khataNumber} onChange={e => set('khataNumber', e.target.value)} />
+                </FormField>
+                <FormField label="Block Name" required>
+                  <input className="input" placeholder="Block name" value={form.blockName} onChange={e => set('blockName', e.target.value)} />
+                </FormField>
+                <FormField label="Pincode" required>
+                  <input className="input" placeholder="6-digit pincode" value={form.pincode} onChange={e => set('pincode', e.target.value)} maxLength={6} />
+                </FormField>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3 — Documents */}
+          {step === 3 && (
+            <div className="space-y-5 animate-fade-in">
+              <h2 className="text-xl font-bold text-brand-text mb-6 flex items-center gap-2">
+                <Upload className="w-5 h-5 text-brand-green" /> Document Upload
+              </h2>
+              <p className="text-sm text-brand-text-muted mb-4">Please upload clear scanned copies or photos of the following documents.</p>
+              <div className="space-y-4">
+                {[
+                  { key: 'aadhaarFront', label: 'Aadhaar Card — Front', required: true },
+                  { key: 'aadhaarBack', label: 'Aadhaar Card — Back', required: true },
+                  { key: 'landDocument', label: 'Land Document / Patta', required: true },
+                ].map(({ key, label, required }) => (
+                  <div key={key} className={`border-2 border-dashed rounded-2xl p-5 text-center transition-colors ${form[key] ? 'border-brand-green bg-brand-green-pale' : 'border-brand-green-light hover:border-brand-green'}`}>
+                    <FileText className={`w-8 h-8 mx-auto mb-2 ${form[key] ? 'text-brand-green' : 'text-brand-text-muted'}`} />
+                    <p className="text-sm font-medium text-brand-text mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</p>
+                    {form[key] ? (
+                      <p className="text-xs text-brand-green font-semibold">{form[key].name} ✓</p>
+                    ) : (
+                      <p className="text-xs text-brand-text-muted">PDF, JPG, PNG up to 5MB</p>
+                    )}
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" id={`file-${key}`}
+                      onChange={e => set(key, e.target.files?.[0] || null)} />
+                    <label htmlFor={`file-${key}`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-green cursor-pointer hover:underline">
+                      <Upload className="w-3 h-3" /> {form[key] ? 'Change File' : 'Choose File'}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 p-4 bg-brand-yellow-pale rounded-2xl text-sm text-brand-text">
+                <p className="font-semibold mb-1">📋 By submitting this form:</p>
+                <ul className="text-brand-text-muted space-y-1 list-disc list-inside">
+                  <li>A customer account will be created with your email</li>
+                  <li>An Application ID will be generated</li>
+                  <li>You can track status in your dashboard</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between gap-3 mt-8 pt-6 border-t border-brand-green-pale">
+            {step > 1 ? (
+              <button onClick={() => { setError(''); setStep(s => s - 1); }} className="btn-outline">
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </button>
+            ) : (
+              <Link to="/services" className="btn-ghost">← Back to Services</Link>
+            )}
+            {step < 3 ? (
+              <button onClick={nextStep} className="btn-primary ml-auto">
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={submitting} className="btn-primary ml-auto disabled:opacity-60">
+                {submitting ? 'Submitting…' : 'Submit Application'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-brand-text-muted mt-6">
+          Already have an account?{' '}
+          <Link to="/login" className="text-brand-green font-semibold hover:underline">Login here</Link>
+        </p>
+      </div>
+    </div>
+  );
+}

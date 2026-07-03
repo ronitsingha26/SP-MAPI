@@ -1,0 +1,177 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Map, Filter, Search, RefreshCw, ChevronDown } from 'lucide-react';
+import api from '../../utils/api';
+
+const STATUS_LABEL = {
+  submitted: 'Submitted', verification: 'Verification', map_preparation: 'Map Preparation',
+  ready: 'Ready', delivered: 'Delivered', completed: 'Completed', rejected: 'Rejected'
+};
+const STATUS_COLOR = {
+  submitted: 'badge-grey', verification: 'badge-yellow', map_preparation: 'badge-yellow',
+  ready: 'badge-green', delivered: 'badge-green', completed: 'badge-blue', rejected: 'badge-red'
+};
+const MAP_STATUSES = ['submitted', 'verification', 'map_preparation', 'ready', 'delivered', 'completed', 'rejected'];
+
+export default function AdminMapRequestsPage() {
+  const [apps, setApps] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+
+  const fetchApps = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ service_type: 'map', limit: 100 });
+      if (filter !== 'all') params.set('status', filter);
+      if (search) params.set('search', search);
+      const res = await api.get(`/admin/applications?${params}`);
+      setApps(res.data.applications || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load applications.');
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, search]);
+
+  useEffect(() => {
+    const timer = setTimeout(fetchApps, 300);
+    return () => clearTimeout(timer);
+  }, [fetchApps]);
+
+  const handleStatusUpdate = async (appId, newStatus) => {
+    setUpdatingId(appId);
+    try {
+      await api.put(`/admin/applications/${appId}/status`, { status: newStatus });
+      setApps(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus } : a));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update status.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title flex items-center gap-2">
+            <Map className="w-6 h-6 text-blue-500" /> Map Requests
+          </h1>
+          <p className="page-subtitle">Review and manage digital map / Naksha requests</p>
+        </div>
+        <button onClick={fetchApps} className="btn-outline text-sm">
+          <RefreshCw className="w-4 h-4" /> Refresh
+        </button>
+      </div>
+
+      <div className="card mb-6">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between">
+          <div className="flex items-center gap-2 bg-brand-green-pale rounded-xl px-3 py-2 max-w-sm flex-1">
+            <Search className="w-4 h-4 text-brand-text-muted" />
+            <input
+              type="text" placeholder="Search by ID, Name, or Mobile..."
+              value={search} onChange={e => setSearch(e.target.value)}
+              className="bg-transparent text-sm outline-none w-full"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-brand-text-muted" />
+            <select className="input py-2 bg-brand-green-pale border-none" value={filter} onChange={e => setFilter(e.target.value)}>
+              <option value="all">All Statuses</option>
+              {MAP_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        {loading ? (
+          <div className="flex justify-center py-12"><RefreshCw className="w-8 h-8 text-brand-green animate-spin" /></div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">⚠️ {error}</div>
+        ) : (
+          <div className="table-wrapper">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Request ID & Date</th>
+                  <th>Applicant</th>
+                  <th>District</th>
+                  <th>Amin</th>
+                  <th>Status</th>
+                  <th>Update Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {apps.map(app => (
+                  <>
+                    <tr key={app.id}>
+                      <td>
+                        <p className="font-mono text-xs font-semibold text-brand-green">{app.app_id}</p>
+                        <p className="text-xs text-brand-text-muted">{new Date(app.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                      </td>
+                      <td>
+                        <p className="font-medium text-brand-text">{app.applicant_name}</p>
+                        <p className="text-xs text-brand-text-muted">{app.applicant_mobile}</p>
+                      </td>
+                      <td className="text-sm text-brand-text-muted">{app.district || '—'}</td>
+                      <td className="text-xs">
+                        {app.amin_name
+                          ? <span className="text-brand-green font-medium">{app.amin_name}</span>
+                          : <span className="text-yellow-600 font-semibold">Not Assigned</span>}
+                      </td>
+                      <td>
+                        <span className={STATUS_COLOR[app.status] || 'badge-grey'}>{STATUS_LABEL[app.status] || app.status}</span>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <select
+                            className="text-xs border border-gray-200 rounded-lg p-1.5 bg-white"
+                            value={app.status}
+                            disabled={updatingId === app.id}
+                            onChange={e => handleStatusUpdate(app.id, e.target.value)}
+                          >
+                            {MAP_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
+                          </select>
+                          {updatingId === app.id && <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-green" />}
+                        </div>
+                      </td>
+                      <td>
+                        <button
+                          className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green"
+                          onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}
+                        >
+                          <ChevronDown className={`w-4 h-4 transition-transform ${expandedId === app.id ? 'rotate-180' : ''}`} />
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedId === app.id && (
+                      <tr key={`${app.id}-exp`} className="bg-blue-50/40">
+                        <td colSpan="7" className="p-4">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div><span className="text-brand-text-muted text-xs">Email</span><p className="font-medium">{app.applicant_email || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Payment</span><p className="font-medium capitalize">{app.payment_status || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Service</span><p className="font-medium">Map Copy</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Updated</span><p className="font-medium">{app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-IN') : '—'}</p></div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                ))}
+                {apps.length === 0 && (
+                  <tr><td colSpan="7" className="text-center py-12 text-brand-text-muted">No map requests found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="mt-4 text-sm text-brand-text-muted">Total: {apps.length} requests</div>
+      </div>
+    </div>
+  );
+}
