@@ -57,7 +57,7 @@ export default function CustomerProfilePage() {
   };
 
   return (
-    <div className="max-w-3xl animate-fade-in">
+    <div className="max-w-3xl mx-auto animate-fade-in">
       <div className="page-header">
         <div>
           <h1 className="page-title">My Profile</h1>

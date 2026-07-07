@@ -194,7 +194,7 @@ export default function CustomerBantwaraForm() {
               )}
             </div>
             <button className="btn-primary w-full justify-center mt-4"
-              onClick={() => { if (!form.districtId) { setError('Please select a district'); } else if(!form.blockId) { setError('Please select a block'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
+              onClick={() => { if (!form.districtName) { setError('Please select a district'); } else if(!form.blockName) { setError('Please select a block'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
               Next: Upload Documents <ChevronRight className="w-4 h-4" />
             </button>
           </div>
