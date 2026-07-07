@@ -51,6 +51,20 @@ class AdminService {
     params.push(Number(limit), Number(offset));
 
     const applications = await adminRepository.getApplicationsAll(conditions, params);
+    
+    if (applications.length > 0) {
+      const appIds = applications.map(a => a.id);
+      const docs = await adminRepository.getDocumentsForApplications(appIds);
+      const docsByApp = {};
+      docs.forEach(d => {
+        if (!docsByApp[d.application_id]) docsByApp[d.application_id] = [];
+        docsByApp[d.application_id].push(d);
+      });
+      applications.forEach(a => {
+        a.documents = docsByApp[a.id] || [];
+      });
+    }
+
     const total = await adminRepository.getApplicationsCount(conditions, countParams);
 
     return { applications, total, page: parseInt(page), limit: parseInt(limit) };

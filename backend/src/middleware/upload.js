@@ -19,7 +19,12 @@ const storage = multer.diskStorage({
     else if (file.fieldname.includes('land'))     folder = 'land_documents';
     else if (file.fieldname.includes('report'))   folder = 'field_reports';
     else if (file.fieldname.includes('map'))      folder = 'maps';
-    cb(null, path.join(UPLOAD_PATH, folder));
+    
+    const targetDir = path.join(UPLOAD_PATH, folder);
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    cb(null, targetDir);
   },
   filename: (req, file, cb) => {
     const ext  = path.extname(file.originalname).toLowerCase();

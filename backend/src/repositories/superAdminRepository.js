@@ -101,6 +101,12 @@ class SuperAdminRepository {
       if (search) { query += ` AND (name LIKE ? OR mobile LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
       query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
       params.push(Number(limit), Number(offset));
+    } else if (type === 'admins') {
+      query = `SELECT id,name,mobile,email,status,created_at
+               FROM admins WHERE deleted_at IS NULL`;
+      if (search) { query += ` AND (name LIKE ? OR mobile LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
+      query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+      params.push(Number(limit), Number(offset));
     } else {
       query = `SELECT id,name,mobile,email,district,status,is_mobile_verified,created_at
                FROM customers WHERE deleted_at IS NULL`;

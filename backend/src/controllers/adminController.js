@@ -62,7 +62,8 @@ exports.createAmin = async (req, res, next) => {
   try {
     const { name, mobile, password } = req.body;
     if (!name || !mobile || !password) return next(new AppError('Name, mobile, and password are required.', 400));
-    const amin = await adminService.createAmin(req.body, req.user.id);
+    const adminId = req.user.role === 'superadmin' ? null : req.user.id;
+    const amin = await adminService.createAmin(req.body, adminId);
     res.status(201).json({ success: true, message: 'Amin created successfully.', amin });
   } catch (err) { next(err); }
 };

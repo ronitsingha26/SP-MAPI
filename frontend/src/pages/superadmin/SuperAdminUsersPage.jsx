@@ -45,7 +45,7 @@ export default function SuperAdminUsersPage() {
       {/* Type Tabs + Search */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="flex bg-white rounded-xl border border-brand-green-pale p-1">
-          {['customers', 'amins'].map(t => (
+          {['customers', 'amins', 'admins'].map(t => (
             <button key={t} onClick={() => { setType(t); setPage(1); }}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors capitalize ${type === t ? 'bg-brand-green text-white' : 'text-brand-text-muted hover:bg-brand-green-pale'}`}>
               {t}

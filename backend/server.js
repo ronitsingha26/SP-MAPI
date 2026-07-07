@@ -29,9 +29,12 @@ app.use(cors({
 }));
 
 // ── Rate Limiting ─────────────────────────────────────────────
+const isDev = process.env.NODE_ENV !== 'production';
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 200,
+  skip: () => isDev, // Skip rate limiting in development
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests. Please try again in 15 minutes.' }
@@ -40,6 +43,7 @@ const apiLimiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
+  skip: () => isDev, // Skip rate limiting in development
   message: { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' }
 });
 

@@ -183,7 +183,7 @@ export default function CustomerBantwaraForm() {
               <FormField label="Mouja Name"><input className="input" placeholder="Mouja name or number" value={form.moujaName} onChange={e => set('moujaName', e.target.value)} /></FormField>
               <FormField label="Khata Number"><input className="input" placeholder="Khata number" value={form.khataNumber} onChange={e => set('khataNumber', e.target.value)} /></FormField>
               <FormField label="Pincode" required><input className="input" placeholder="6-digit pincode" maxLength={6} value={form.pincode} onChange={e => set('pincode', e.target.value.replace(/\D/g, ''))} /></FormField>
-              <FormField label="Land Area (sq. ft.)"><input className="input" type="number" min="0" placeholder="Total land area" value={form.landArea} onChange={e => set('landArea', e.target.value)} /></FormField>
+              <FormField label="Land Area (sq. ft.)" required><input className="input" type="number" min="0" placeholder="Total land area" value={form.landArea} onChange={e => set('landArea', e.target.value)} /></FormField>
               <FormField label="Court Case Number (if any)"><input className="input" placeholder="Case number if applicable" value={form.courtCaseNumber} onChange={e => set('courtCaseNumber', e.target.value)} /></FormField>
               {form.landArea && (
                 <div className="sm:col-span-2 bg-brand-yellow-pale rounded-xl p-4">
@@ -194,7 +194,7 @@ export default function CustomerBantwaraForm() {
               )}
             </div>
             <button className="btn-primary w-full justify-center mt-4"
-              onClick={() => { if (!form.districtName) { setError('Please select a district'); } else if(!form.blockName) { setError('Please select a block'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
+              onClick={() => { if (!form.districtName) { setError('Please select a district'); } else if(!form.blockName) { setError('Please select a block'); } else if(!form.landArea) { setError('Please enter total land area'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
               Next: Upload Documents <ChevronRight className="w-4 h-4" />
             </button>
           </div>

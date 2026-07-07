@@ -142,6 +142,15 @@ class AdminRepository {
     await pool.query('UPDATE amins SET active_tasks=active_tasks+1 WHERE id=?', [aminId]);
   }
 
+  async getDocumentsForApplications(appIds) {
+    if (!appIds || appIds.length === 0) return [];
+    const result = await pool.query(
+      `SELECT * FROM documents WHERE application_id IN (?)`,
+      [appIds]
+    );
+    return result.rows;
+  }
+
   async getCustomers(conditions, params) {
     const result = await pool.query(
       `SELECT id, name, mobile, email, district, status, is_mobile_verified, created_at,
