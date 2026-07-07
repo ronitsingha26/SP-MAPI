@@ -74,7 +74,7 @@ export default function AminDashboard() {
       {/* Active Tasks */}
       <div className="card">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-brand-text text-lg">Recent Active Tasks</h2>
+          <h2 className="font-bold text-brand-text text-lg">Recent Active Task</h2>
           <Link to="/amin/tasks" className="text-sm text-brand-green font-semibold hover:underline flex items-center gap-1">
             All Tasks <ArrowRight className="w-3.5 h-3.5" />
           </Link>
