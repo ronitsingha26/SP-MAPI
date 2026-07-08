@@ -273,6 +273,31 @@ class AdminRepository {
     );
     return result.rows;
   }
+
+  async getApplicationFiles(applicationId) {
+    const docs = await pool.query('SELECT file_path FROM documents WHERE application_id = ?', [applicationId]);
+    const reports = await pool.query('SELECT final_report_url, map_pdf_url, photos FROM survey_reports WHERE application_id = ?', [applicationId]);
+    return { docs: docs.rows, reports: reports.rows };
+  }
+
+  async deleteApplication(applicationId) {
+    await pool.query('DELETE FROM applications WHERE id = ?', [applicationId]);
+    await pool.query('DELETE FROM notifications WHERE action_link LIKE ?', [`%${applicationId}%`]);
+  }
+
+  async getToolRequest(toolRequestId) {
+    const res = await pool.query('SELECT * FROM tool_requests WHERE id = ?', [toolRequestId]);
+    return res.rows[0];
+  }
+
+  async deleteToolRequest(toolRequestId) {
+    await pool.query('DELETE FROM tool_requests WHERE id = ?', [toolRequestId]);
+    await pool.query('DELETE FROM notifications WHERE action_link LIKE ?', [`%${toolRequestId}%`]);
+  }
+
+  async restoreToolStock(toolName, quantity) {
+    await pool.query('UPDATE tools_inventory SET stock_quantity = stock_quantity + ? WHERE name = ?', [quantity, toolName]);
+  }
 }
 
 module.exports = new AdminRepository();

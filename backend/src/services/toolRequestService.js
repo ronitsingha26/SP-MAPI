@@ -28,9 +28,9 @@ class ToolRequestService {
     });
 
     await pool.query(
-      `INSERT INTO tool_requests (id, app_id, customer_id, tools, remarks, payment_required)
-       VALUES (?,?,?,?,?,?)`,
-      [id, app_id, customer_id, JSON.stringify(tools), remarks || null, total_price]
+      `INSERT INTO tool_requests (id, app_id, customer_id, tools, remarks)
+       VALUES (?,?,?,?,?)`,
+      [id, app_id, customer_id, JSON.stringify(tools), remarks || null]
     );
 
     // Log activity
@@ -95,6 +95,89 @@ class ToolRequestService {
       new_status: status,
       remarks: admin_remark
     });
+  }
+
+  async withdrawToolRequest(id, customer_id) {
+    const { AppError } = require('../middleware/errorHandler');
+    
+    const client = await pool.getConnection();
+    try {
+      await client.beginTransaction();
+
+      const { rows: trRows } = await client.query('SELECT * FROM tool_requests WHERE id = ? AND customer_id = ? FOR UPDATE', [id, customer_id]);
+      if (trRows.length === 0) {
+        throw new AppError('Tool request not found or not authorized.', 404);
+      }
+
+      const tr = trRows[0];
+      if (tr.status === 'withdrawn') {
+        throw new AppError('Application has already been withdrawn.', 409);
+      }
+
+      const eligibleStatuses = ['pending', 'approved', 'dispatched'];
+      if (!eligibleStatuses.includes(tr.status)) {
+        throw new AppError(`Cannot withdraw tool request with status: ${tr.status}.`, 400);
+      }
+
+      const oldStatus = tr.status;
+      const withdrawReason = 'Withdrawn by customer';
+
+      // Update status
+      await client.query(`
+        UPDATE tool_requests 
+        SET status = 'withdrawn', 
+            withdrawn_at = NOW(), 
+            withdrawn_by = ?, 
+            withdraw_reason = ? 
+        WHERE id = ?
+      `, [customer_id, withdrawReason, id]);
+
+      // If approved or dispatched, restore inventory
+      if (['approved', 'dispatched'].includes(oldStatus) && tr.tools) {
+        const toolsArr = typeof tr.tools === 'string' ? JSON.parse(tr.tools) : tr.tools;
+        for (const tool of toolsArr) {
+          if (tool.name && tool.quantity) {
+            await client.query('UPDATE tools_inventory SET stock_quantity = stock_quantity + ? WHERE name = ?', [tool.quantity, tool.name]);
+          }
+        }
+      }
+
+      // Fetch customer name for logs
+      const { rows: cRows } = await client.query('SELECT name FROM customers WHERE id = ?', [customer_id]);
+      const customerName = cRows[0]?.name || 'Customer';
+
+      // Activity Log
+      await client.query(`
+        INSERT INTO activity_logs (tool_request_id, action, performed_by, performer_type, performer_name, old_status, new_status, remarks)
+        VALUES (?, 'Tool Request Withdrawn', ?, 'customer', ?, ?, 'withdrawn', ?)
+      `, [id, customer_id, customerName, oldStatus, withdrawReason]);
+
+      // Audit Log
+      await client.query(`
+        INSERT INTO audit_logs (actor_id, actor_type, actor_name, action, entity_type, entity_id, old_value, new_value)
+        VALUES (?, 'customer', ?, 'Tool Request Withdrawn', 'tool_requests', ?, ?, ?)
+      `, [customer_id, customerName, id, JSON.stringify({ status: oldStatus }), JSON.stringify({ status: 'withdrawn', reason: withdrawReason })]);
+
+      // Admin Notification
+      await client.query(`
+        INSERT INTO notifications (id, user_id, user_type, title, message, action_link)
+        VALUES (UUID(), 'all', 'admin', 'Tool Request Withdrawn', ?, '/admin/tools-orders')
+      `, [`Customer has withdrawn tool request ${tr.app_id}`]);
+
+      // Customer Notification
+      await client.query(`
+        INSERT INTO notifications (id, user_id, user_type, title, message, action_link)
+        VALUES (UUID(), ?, 'customer', 'Tool Request Withdrawn', ?, '/customer/dashboard')
+      `, [customer_id, `Your tool request ${tr.app_id} has been successfully withdrawn.`]);
+
+      await client.commit();
+      return { success: true, app_id: tr.app_id };
+    } catch (err) {
+      await client.rollback();
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 }
 

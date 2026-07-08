@@ -90,6 +90,30 @@ exports.getMyApplications = async (req, res, next) => {
   }
 };
 
+exports.withdrawApplication = async (req, res, next) => {
+  try {
+    const result = await applicationService.withdrawApplication(req.params.id, req.user.id);
+    res.json({ success: true, data: result, message: 'Application withdrawn successfully' });
+  } catch (err) {
+    if (err.message === 'Application has already been withdrawn.') {
+      return res.status(409).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+
+exports.withdrawToolRequest = async (req, res, next) => {
+  try {
+    const result = await toolRequestService.withdrawToolRequest(req.params.id, req.user.id);
+    res.json({ success: true, data: result, message: 'Tool request withdrawn successfully' });
+  } catch (err) {
+    if (err.message === 'Application has already been withdrawn.') {
+      return res.status(409).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+
 exports.updateApplication = async (req, res, next) => {
   try {
     const application = await applicationService.updateApplication(req.params.id, req.user.id, req.body);

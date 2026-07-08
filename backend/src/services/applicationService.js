@@ -216,6 +216,90 @@ class ApplicationService {
     return await applicationRepository.updateApplication(id, data);
   }
 
+  async withdrawApplication(id, customer_id) {
+    const client = await pool.getConnection();
+    try {
+      await client.beginTransaction();
+
+      const [appRows] = await client.query('SELECT * FROM applications WHERE id = ? AND customer_id = ? FOR UPDATE', [id, customer_id]);
+      if (appRows.length === 0) {
+        throw new AppError('Application not found or not authorized.', 404);
+      }
+
+      const app = appRows[0];
+      if (app.status === 'withdrawn') {
+        throw new AppError('Application has already been withdrawn.', 409);
+      }
+
+      const eligibleStatuses = ['pending', 'assigned'];
+      if (!eligibleStatuses.includes(app.status)) {
+        throw new AppError(`Cannot withdraw application with status: ${app.status}. Only pending or assigned applications can be withdrawn.`, 400);
+      }
+
+      const oldStatus = app.status;
+      const withdrawReason = 'Withdrawn by customer';
+
+      // Update application
+      await client.query(`
+        UPDATE applications 
+        SET status = 'withdrawn', 
+            withdrawn_at = NOW(), 
+            withdrawn_by = ?, 
+            withdraw_reason = ? 
+        WHERE id = ?
+      `, [customer_id, withdrawReason, id]);
+
+      // Update assignment if exists
+      if (app.assigned_amin_id) {
+        await client.query(`
+          UPDATE assignments 
+          SET status = 'withdrawn' 
+          WHERE application_id = ? AND status = 'pending'
+        `, [id]);
+      }
+
+      // Activity Log
+      await client.query(`
+        INSERT INTO activity_logs (application_id, action, performed_by, performer_type, performer_name, old_status, new_status, remarks)
+        VALUES (?, 'Application Withdrawn', ?, 'customer', ?, ?, 'withdrawn', ?)
+      `, [id, customer_id, app.applicant_name, oldStatus, withdrawReason]);
+
+      // Audit Log
+      await client.query(`
+        INSERT INTO audit_logs (actor_id, actor_type, actor_name, action, entity_type, entity_id, old_value, new_value)
+        VALUES (?, 'customer', ?, 'Application Withdrawn', 'applications', ?, ?, ?)
+      `, [customer_id, app.applicant_name, id, JSON.stringify({ status: oldStatus }), JSON.stringify({ status: 'withdrawn', reason: withdrawReason })]);
+
+      // Admin Notification
+      await client.query(`
+        INSERT INTO notifications (id, user_id, user_type, title, message, action_link)
+        VALUES (UUID(), 'all', 'admin', 'Application Withdrawn', ?, '/admin/applications')
+      `, [`Customer has withdrawn application ${app.app_id}`]);
+
+      // Amin Notification
+      if (app.assigned_amin_id) {
+        await client.query(`
+          INSERT INTO notifications (id, user_id, user_type, title, message, action_link)
+          VALUES (UUID(), ?, 'amin', 'Application Withdrawn', ?, '/amin/dashboard')
+        `, [app.assigned_amin_id, `Application ${app.app_id} has been withdrawn by the customer.`]);
+      }
+      
+      // Customer Notification
+      await client.query(`
+        INSERT INTO notifications (id, user_id, user_type, title, message, action_link)
+        VALUES (UUID(), ?, 'customer', 'Application Withdrawn', ?, '/customer/dashboard')
+      `, [customer_id, `Your application ${app.app_id} has been successfully withdrawn.`]);
+
+      await client.commit();
+      return { success: true, app_id: app.app_id };
+    } catch (err) {
+      await client.rollback();
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   async trackApplication(app_id) {
     const app = await applicationRepository.getApplicationByIdOrAppId(app_id);
     if (!app) throw new AppError('Application not found. Please check the Application ID.', 404);

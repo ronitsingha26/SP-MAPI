@@ -50,6 +50,13 @@ exports.assignAmin = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+exports.deleteApplication = async (req, res, next) => {
+  try {
+    await adminService.deleteApplication(req.params.id);
+    res.json({ success: true, message: 'Application deleted successfully.' });
+  } catch (err) { next(err); }
+};
+
 exports.getCustomers = async (req, res, next) => {
   try {
     const customers = await adminService.getCustomers(req.user.id, req.query);
@@ -267,6 +274,13 @@ exports.updateToolRequestStatus = async (req, res, next) => {
     if (!status) return next(new AppError('Status is required.', 400));
     await toolRequestService.updateToolRequestStatus(req.params.id, status, admin_remark, req.user.id);
     res.json({ success: true, message: `Tool request status updated to ${status}.` });
+  } catch (err) { next(err); }
+};
+
+exports.deleteToolRequest = async (req, res, next) => {
+  try {
+    await adminService.deleteToolRequest(req.params.id);
+    res.json({ success: true, message: 'Tool request deleted successfully.' });
   } catch (err) { next(err); }
 };
 

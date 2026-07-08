@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, ClipboardList, Map, GitBranch, RefreshCw, Plus, Pencil, X, Save, ChevronDown, ChevronUp, AlertCircle, Wrench } from 'lucide-react';
+import { FileText, ClipboardList, Map, GitBranch, RefreshCw, Plus, Pencil, X, Save, ChevronDown, ChevronUp, AlertCircle, Wrench, Trash2, XCircle } from 'lucide-react';
 import api, { getFileUrl } from '../../utils/api';
 
 const STATUS_LABEL = {
   submitted: 'Submitted', verification: 'Verification', processing: 'Processing',
   approved: 'Approved', rejected: 'Rejected', completed: 'Completed',
-  map_preparation: 'Map Preparation', ready: 'Ready', delivered: 'Delivered', assigned: 'Assigned'
+  map_preparation: 'Map Preparation', ready: 'Ready', delivered: 'Delivered', assigned: 'Assigned',
+  withdrawn: 'Withdrawn'
 };
 const STATUS_COLOR = {
   submitted: 'badge-grey', verification: 'badge-yellow', processing: 'badge-yellow',
   approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue',
-  map_preparation: 'badge-yellow', ready: 'badge-green', delivered: 'badge-green', assigned: 'badge-yellow'
+  map_preparation: 'badge-yellow', ready: 'badge-green', delivered: 'badge-green', assigned: 'badge-yellow',
+  withdrawn: 'badge-red'
 };
 const TYPE_LABELS = { mapi: 'Mapi Registration', bantwara: 'Bantwara Registration', map: 'Map Request', tools: 'Amin Tools' };
 const EDITABLE_STATUSES = ['submitted', 'pending'];
@@ -139,10 +141,14 @@ const loadRazorpay = () => {
 };
 
 // ── Application Detail Row ──────────────────────────────────────────────────
-function AppRow({ app, onEdit, onUpdate }) {
+function AppRow({ app, onEdit, onUpdate, onWithdraw }) {
   const [expanded, setExpanded] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const canEdit = EDITABLE_STATUSES.includes(app.status);
+  
+  const canWithdraw = app.service_type === 'tools' 
+    ? ['pending', 'approved', 'dispatched'].includes(app.status)
+    : ['submitted', 'pending', 'assigned'].includes(app.status);
 
   const handlePayNow = async () => {
     setIsPaying(true);
@@ -218,7 +224,10 @@ function AppRow({ app, onEdit, onUpdate }) {
 
   return (
     <>
-      <tr className="hover:bg-brand-green-pale/20 transition-colors">
+      <tr 
+        className="hover:bg-brand-green-pale/20 transition-colors cursor-pointer"
+        onClick={() => setExpanded(e => !e)}
+      >
         <td className="font-mono text-xs font-semibold text-brand-green">{app.app_id}</td>
         <td>
           <span className="flex items-center gap-1.5">
@@ -238,7 +247,7 @@ function AppRow({ app, onEdit, onUpdate }) {
           {app.amin_name || <span className="text-yellow-600 font-medium">Not Assigned</span>}
         </td>
         <td>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
             {canEdit && (
               <button
                 onClick={() => onEdit(app)}
@@ -246,6 +255,15 @@ function AppRow({ app, onEdit, onUpdate }) {
                 className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green transition-colors"
               >
                 <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {canWithdraw && (
+              <button
+                onClick={() => onWithdraw(app)}
+                title="Withdraw Application"
+                className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+              >
+                <XCircle className="w-3.5 h-3.5" />
               </button>
             )}
             <button
@@ -366,6 +384,23 @@ export default function CustomerApplicationsPage() {
     setApplications(prev => prev.map(a => a.id === updatedApp.id ? { ...a, ...updatedApp } : a));
   };
 
+  const handleWithdraw = async (app) => {
+    if (!window.confirm("Are you sure you want to withdraw this application?\n\nThis action cannot be undone.\nThe application will no longer be processed.")) return;
+    
+    try {
+      const isTools = app.service_type === 'tools';
+      const endpoint = isTools ? `/applications/tool-requests/${app.id}/withdraw` : `/applications/${app.id}/withdraw`;
+      
+      await api.put(endpoint);
+      setApplications(prev => prev.map(a => a.id === app.id ? { ...a, status: 'withdrawn' } : a));
+      
+      // We could use a toast here if a toast library is available, but alert guarantees visibility per requirements
+      alert('Application withdrawn successfully.');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to withdraw application');
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       {/* Edit Modal */}
@@ -456,6 +491,7 @@ export default function CustomerApplicationsPage() {
                     app={app}
                     onEdit={setEditingApp}
                     onUpdate={handleSaveEdit}
+                    onWithdraw={handleWithdraw}
                   />
                 ))}
               </tbody>

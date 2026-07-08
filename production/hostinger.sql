@@ -290,7 +290,8 @@ CREATE TABLE IF NOT EXISTS applications (
         'completed',
         'delivered',
         'rejected',
-        'cancelled'
+        'cancelled',
+        'withdrawn'
     ) NOT NULL DEFAULT 'pending',
     status_history JSON NOT NULL,
     admin_remark TEXT NULL,
@@ -299,6 +300,10 @@ CREATE TABLE IF NOT EXISTS applications (
     amin_assigned_at DATETIME NULL,
     visit_date DATE NULL,
     visit_time TIME NULL,
+    -- Withdrawal
+    withdrawn_at DATETIME NULL,
+    withdrawn_by VARCHAR(36) NULL,
+    withdraw_reason TEXT NULL,
     -- Completion
     field_report_url VARCHAR(500) NULL,
     completed_at DATETIME NULL,
@@ -391,7 +396,8 @@ CREATE TABLE IF NOT EXISTS assignments (
         'accepted',
         'rejected',
         'in_progress',
-        'completed'
+        'completed',
+        'withdrawn'
     ) DEFAULT 'pending',
     accepted_at DATETIME NULL,
     started_at DATETIME NULL,
@@ -456,11 +462,15 @@ CREATE TABLE IF NOT EXISTS tool_requests (
         'dispatched',
         'returned',
         'rejected',
-        'cancelled'
+        'cancelled',
+        'withdrawn'
     ) DEFAULT 'pending',
     admin_remark TEXT NULL,
     processed_by VARCHAR(36) NULL,
     processed_at DATETIME NULL,
+    withdrawn_at DATETIME NULL,
+    withdrawn_by VARCHAR(36) NULL,
+    withdraw_reason TEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_tr_customer (customer_id),

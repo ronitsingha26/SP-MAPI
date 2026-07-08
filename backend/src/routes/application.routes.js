@@ -61,6 +61,10 @@ router.get('/:id/timeline', protect, appCtrl.getApplicationTimeline);
 // ── Customer: update own application (while still pending/submitted) ──
 router.put('/:id', protect, authorize('customer'), appCtrl.updateApplication);
 
+// ── Customer: withdraw application ──
+router.put('/:id/withdraw', protect, authorize('customer'), appCtrl.withdrawApplication);
+router.put('/tool-requests/:id/withdraw', protect, authorize('customer'), appCtrl.withdrawToolRequest);
+
 // ── Customer: Plot Bookings ──
 router.get('/customer/bookings', protect, authorize('customer'), bookCtrl.getCustomerBookings);
 router.post('/customer/bookings', protect, authorize('customer'), bookCtrl.createBooking);

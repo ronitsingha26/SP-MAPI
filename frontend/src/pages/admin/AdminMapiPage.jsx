@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ClipboardList, Filter, Search, UserCheck, RefreshCw, ChevronDown, Eye } from 'lucide-react';
+import { ClipboardList, Filter, Search, UserCheck, RefreshCw, ChevronDown, Eye, Trash2 } from 'lucide-react';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import AssignAminModal from '../../components/admin/AssignAminModal';
 import AminReportsViewer from '../../components/admin/AminReportsViewer';
 import ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';
 
 const STATUS_LABEL = {
   pending: 'Submitted', under_review: 'Verification', in_progress: 'Processing',
-  approved: 'Approved', rejected: 'Rejected', completed: 'Completed', assigned: 'Assigned'
+  approved: 'Approved', rejected: 'Rejected', completed: 'Completed', assigned: 'Assigned', withdrawn: 'Withdrawn'
 };
 const STATUS_COLOR = {
   pending: 'badge-grey', under_review: 'badge-yellow', in_progress: 'badge-yellow',
-  approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue', assigned: 'badge-yellow'
+  approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue', assigned: 'badge-yellow', withdrawn: 'badge-red'
 };
 const MAPI_STATUSES = ['pending', 'under_review', 'in_progress', 'approved', 'rejected', 'completed', 'assigned'];
 
@@ -24,6 +25,7 @@ export default function AdminMapiPage() {
   const [updatingId, setUpdatingId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [assigningAppId, setAssigningAppId] = useState(null);
+  const { currentUser } = useAuth();
 
   const fetchApps = useCallback(async () => {
     setLoading(true);
@@ -54,6 +56,16 @@ export default function AdminMapiPage() {
       alert(err.response?.data?.message || 'Failed to update status.');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/admin/applications/${id}`);
+      fetchApps();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete application.');
     }
   };
 
@@ -115,7 +127,11 @@ export default function AdminMapiPage() {
               <tbody>
                 {apps.map(app => (
                   <>
-                    <tr key={app.id}>
+                    <tr 
+                      key={app.id}
+                      onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}
+                      className="cursor-pointer hover:bg-gray-50/50 transition-colors"
+                    >
                       <td>
                         <p className="font-mono text-xs font-semibold text-brand-green">{app.app_id}</p>
                         <p className="text-xs text-brand-text-muted">{new Date(app.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
@@ -136,26 +152,44 @@ export default function AdminMapiPage() {
                         <span className={STATUS_COLOR[app.status] || 'badge-grey'}>{STATUS_LABEL[app.status] || app.status}</span>
                       </td>
                       <td>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                           <select
-                            className="text-xs border border-gray-200 rounded-lg p-1.5 bg-white"
+                            className={`text-xs border border-gray-200 rounded-lg p-1.5 ${app.status === 'withdrawn' ? 'bg-gray-100 text-gray-500' : 'bg-white'}`}
                             value={app.status}
-                            disabled={updatingId === app.id}
+                            disabled={updatingId === app.id || app.status === 'withdrawn'}
                             onChange={e => handleStatusUpdate(app.id, e.target.value)}
                           >
+                            {app.status === 'withdrawn' && <option value="withdrawn">{STATUS_LABEL['withdrawn'] || 'Withdrawn'}</option>}
                             {MAPI_STATUSES.map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
                           </select>
                           {updatingId === app.id && <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-green" />}
                         </div>
                       </td>
                       <td>
-                        <button
-                          className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green transition-colors"
-                          onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}
-                          title="View Details"
-                        >
-                          <ChevronDown className={`w-4 h-4 transition-transform ${expandedId === app.id ? 'rotate-180' : ''}`} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedId(expandedId === app.id ? null : app.id);
+                            }}
+                            title="View Details"
+                          >
+                            <ChevronDown className={`w-4 h-4 transition-transform ${expandedId === app.id ? 'rotate-180' : ''}`} />
+                          </button>
+                          {(currentUser?.role === 'superadmin' || currentUser?.role === 'admin') && (
+                            <button
+                              className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(app.id);
+                              }}
+                              title="Delete Application"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                     {expandedId === app.id && (

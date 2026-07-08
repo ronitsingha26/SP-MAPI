@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Wrench, Filter, Search, RefreshCw, ChevronDown, CheckCircle2, XCircle } from 'lucide-react';
+import { Wrench, Filter, Search, RefreshCw, ChevronDown, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 const STATUS_LABEL = {
   pending: 'Pending', approved: 'Approved', dispatched: 'Dispatched',
-  returned: 'Returned', rejected: 'Rejected', cancelled: 'Cancelled'
+  returned: 'Returned', rejected: 'Rejected', cancelled: 'Cancelled', withdrawn: 'Withdrawn'
 };
 const STATUS_COLOR = {
   pending: 'badge-yellow', approved: 'badge-green', dispatched: 'badge-blue',
-  returned: 'badge-grey', rejected: 'badge-red', cancelled: 'badge-red'
+  returned: 'badge-grey', rejected: 'badge-red', cancelled: 'badge-red', withdrawn: 'badge-red'
 };
 const TOOL_STATUSES = ['pending', 'approved', 'dispatched', 'returned', 'rejected', 'cancelled'];
 
@@ -21,6 +22,7 @@ export default function AdminToolsOrdersPage() {
   const [updatingId, setUpdatingId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [adminRemark, setAdminRemark] = useState({});
+  const { currentUser } = useAuth();
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -55,6 +57,16 @@ export default function AdminToolsOrdersPage() {
       alert(err.response?.data?.message || 'Failed to update status.');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this tool order? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/admin/tool-requests/${id}`);
+      fetchOrders();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete tool request.');
     }
   };
 
@@ -119,7 +131,10 @@ export default function AdminToolsOrdersPage() {
                   
                   return (
                     <React.Fragment key={order.id}>
-                      <tr className={`hover:bg-gray-50/50 transition-colors ${isExpanded ? 'bg-gray-50/50' : ''}`}>
+                      <tr 
+                        className={`cursor-pointer hover:bg-gray-50/50 transition-colors ${isExpanded ? 'bg-gray-50/50' : ''}`}
+                        onClick={() => setExpandedId(isExpanded ? null : order.id)}
+                      >
                         <td className="p-4">
                           <p className="font-semibold text-brand-text">{order.app_id}</p>
                         </td>
@@ -140,12 +155,30 @@ export default function AdminToolsOrdersPage() {
                           <span className={STATUS_COLOR[order.status] || 'badge-grey'}>{STATUS_LABEL[order.status]}</span>
                         </td>
                         <td className="p-4 text-right">
-                          <button
-                            onClick={() => setExpandedId(isExpanded ? null : order.id)}
-                            className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green transition-colors"
-                          >
-                            <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedId(isExpanded ? null : order.id);
+                              }}
+                              className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green transition-colors"
+                              title="View Details"
+                            >
+                              <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            </button>
+                            {(currentUser?.role === 'superadmin' || currentUser?.role === 'admin') && (
+                              <button
+                                className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(order.id);
+                                }}
+                                title="Delete Order"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                       {isExpanded && (
@@ -192,27 +225,33 @@ export default function AdminToolsOrdersPage() {
                                       onChange={(e) => setAdminRemark(prev => ({ ...prev, [order.id]: e.target.value }))}
                                     />
                                   </div>
-                                  <div className="flex gap-2 flex-wrap">
-                                    {TOOL_STATUSES.map(s => {
-                                      if (s === order.status) return null; // Don't show current status button
-                                      return (
-                                        <button
-                                          key={s}
-                                          onClick={() => handleStatusUpdate(order.id, s)}
-                                          disabled={updatingId === order.id}
-                                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                                            s === 'approved' ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100' :
-                                            s === 'dispatched' ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' :
-                                            s === 'returned' ? 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100' :
-                                            s === 'rejected' || s === 'cancelled' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' :
-                                            'border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                                          } disabled:opacity-50`}
-                                        >
-                                          Mark {STATUS_LABEL[s]}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
+                                  {order.status === 'withdrawn' ? (
+                                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                      <p className="text-sm text-gray-500 font-semibold italic">This order was withdrawn by the customer and cannot be updated.</p>
+                                    </div>
+                                  ) : (
+                                    <div className="flex gap-2 flex-wrap">
+                                      {TOOL_STATUSES.map(s => {
+                                        if (s === order.status) return null; // Don't show current status button
+                                        return (
+                                          <button
+                                            key={s}
+                                            onClick={() => handleStatusUpdate(order.id, s)}
+                                            disabled={updatingId === order.id}
+                                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                                              s === 'approved' ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100' :
+                                              s === 'dispatched' ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' :
+                                              s === 'returned' ? 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100' :
+                                              s === 'rejected' || s === 'cancelled' ? 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100' :
+                                              'border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                                            } disabled:opacity-50`}
+                                          >
+                                            Mark {STATUS_LABEL[s]}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

@@ -16,6 +16,7 @@ router.use(protect, authorize('admin', 'superadmin'));
 router.get('/dashboard',                       adminCtrl.getDashboard);
 router.get('/applications',                    adminCtrl.getApplications);
 router.put('/applications/:id/status',         adminCtrl.updateApplicationStatus);
+router.delete('/applications/:id',             adminCtrl.deleteApplication);
 router.post('/applications/:id/assign-amin',   adminCtrl.assignAmin);
 router.get('/applications/:id/timeline',       adminCtrl.getApplicationTimeline);
 router.get('/customers',                       adminCtrl.getCustomers);
@@ -31,6 +32,7 @@ router.get('/export/:type',                    adminCtrl.exportData);
 // ── Tool Requests Management ──
 router.get('/tool-requests',                   adminCtrl.getToolRequests);
 router.put('/tool-requests/:id/status',        adminCtrl.updateToolRequestStatus);
+router.delete('/tool-requests/:id',            adminCtrl.deleteToolRequest);
 
 // ── Properties & Bookings ──
 router.get('/properties',           propCtrl.getAllProperties);
