@@ -60,7 +60,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── Static File Serving (Uploads) ────────────────────────────
-app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOAD_PATH || 'uploads')));
+const uploadDir = path.join(__dirname, process.env.UPLOAD_PATH || 'uploads');
+app.use('/uploads', express.static(uploadDir));
+app.use('/api/uploads', express.static(uploadDir));
 
 // ── API Routes ────────────────────────────────────────────────
 app.use('/api/auth',         require('./src/routes/auth.routes'));

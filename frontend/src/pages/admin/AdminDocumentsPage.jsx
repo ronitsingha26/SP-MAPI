@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileText, CheckCircle2, Clock, XCircle, RefreshCw, Eye, Search } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
-import api from '../../utils/api';
+import api, { getFileUrl } from '../../utils/api';
 
 const statusIcon = { approved: CheckCircle2, pending: Clock, rejected: XCircle };
 const statusClass = { approved: 'text-brand-green', pending: 'text-yellow-500', rejected: 'text-red-500' };
@@ -151,7 +151,7 @@ export default function AdminDocumentsPage() {
                     </td>
                     <td>
                       {doc.file_url && (
-                        <a href={doc.file_url} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-brand-green-pale rounded-lg transition-colors inline-flex" title="View Document">
+                        <a href={getFileUrl(doc.file_url)} target="_blank" rel="noreferrer" className="p-1.5 hover:bg-brand-green-pale rounded-lg transition-colors inline-flex" title="View Document">
                           <Eye className="w-4 h-4 text-brand-green" />
                         </a>
                       )}

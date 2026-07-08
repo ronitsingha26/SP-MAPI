@@ -52,7 +52,7 @@ exports.getDistricts = async (req, res, next) => {
 exports.getPublicTools = async (req, res, next) => {
   try {
     const pool = require('../config/db');
-    const [rows] = await pool.query('SELECT id, name, description, rental_price FROM tools_inventory WHERE is_active = true ORDER BY name ASC');
+    const { rows } = await pool.query('SELECT id, name, description, rental_price FROM tools_inventory WHERE is_active = true ORDER BY name ASC');
     res.json({ success: true, tools: rows });
   } catch (err) { next(err); }
 };

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { statusColor, statusLabel, formatDate } from '../../utils/helpers';
 import { Search, RefreshCw } from 'lucide-react';
 import api from '../../utils/api';
+import CustomerProfileModal from '../../components/admin/CustomerProfileModal';
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState([]);
@@ -9,6 +10,7 @@ export default function AdminCustomersPage() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
   const fetchCustomers = async () => {
     setLoading(true);
@@ -79,29 +81,42 @@ export default function AdminCustomersPage() {
                 <tr><td colSpan="5" className="text-center py-8"><RefreshCw className="w-6 h-6 text-brand-green animate-spin mx-auto" /></td></tr>
               ) : searchFiltered.length === 0 ? (
                 <tr><td colSpan="5" className="text-center py-8 text-brand-text-muted">No customers found.</td></tr>
-              ) : searchFiltered.map(c => (
-                <tr key={c.id}>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-brand-green-pale rounded-full flex items-center justify-center font-semibold text-brand-green text-sm flex-shrink-0">
-                        {c.name?.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-brand-text text-sm">{c.name}</p>
-                        <p className="text-xs text-brand-text-muted">{c.email || '—'}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="font-mono text-sm">+91 {c.mobile}</td>
-                  <td>{c.district || '—'}</td>
-                  <td className="text-xs text-brand-text-muted">{c.created_at ? formatDate(c.created_at) : '—'}</td>
-                  <td><span className={statusColor(c.status)}>{statusLabel(c.status)}</span></td>
-                </tr>
-              ))}
+              ) : (
+                  searchFiltered.map(c => (
+                    <tr 
+                      key={c.id} 
+                      className="hover:bg-brand-green-pale/20 transition-colors cursor-pointer group"
+                      onClick={() => setSelectedCustomerId(c.id)}
+                    >
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-brand-green-pale rounded-full flex items-center justify-center font-semibold text-brand-green text-sm flex-shrink-0">
+                            {c.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-brand-text text-sm">{c.name}</p>
+                            <p className="text-xs text-brand-text-muted">{c.email || '—'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="font-mono text-sm">+91 {c.mobile}</td>
+                      <td>{c.district || '—'}</td>
+                      <td className="text-xs text-brand-text-muted">{c.created_at ? formatDate(c.created_at) : '—'}</td>
+                      <td><span className={statusColor(c.status)}>{statusLabel(c.status)}</span></td>
+                    </tr>
+                  ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {selectedCustomerId && (
+        <CustomerProfileModal 
+          customerId={selectedCustomerId} 
+          onClose={() => setSelectedCustomerId(null)} 
+        />
+      )}
     </div>
   );
 }

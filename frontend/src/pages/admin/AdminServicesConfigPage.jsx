@@ -137,8 +137,8 @@ export default function AdminServicesConfigPage() {
     <div className="animate-fade-in">
       <div className="page-header mb-6">
         <div>
-          <h1 className="page-title flex items-center gap-2"><Settings className="w-6 h-6 text-brand-green" />Configuration</h1>
-          <p className="page-subtitle">Manage service pricing rules and physical tool inventory</p>
+          <h1 className="page-title flex items-center gap-2"><Settings className="w-6 h-6 text-brand-green" />Pricing & Tools</h1>
+          <p className="page-subtitle">Manage service pricing and surveying tools inventory.</p>
         </div>
       </div>
 

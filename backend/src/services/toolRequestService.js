@@ -16,7 +16,7 @@ class ToolRequestService {
 
     // Calculate total price
     let total_price = 0;
-    const [inventoryRows] = await pool.query('SELECT name, rental_price FROM tools_inventory');
+    const { rows: inventoryRows } = await pool.query('SELECT name, rental_price FROM tools_inventory');
     const inventoryMap = {};
     inventoryRows.forEach(row => {
       inventoryMap[row.name] = Number(row.rental_price) || 0;

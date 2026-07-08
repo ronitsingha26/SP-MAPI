@@ -47,6 +47,16 @@ CREATE TABLE IF NOT EXISTS villages (
 -- ============================================================
 -- SERVICES & PRICING
 -- ============================================================
+CREATE TABLE IF NOT EXISTS tools_inventory (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  description TEXT NULL,
+  stock_quantity INT DEFAULT 0,
+  rental_price DECIMAL(10,2) DEFAULT 0.00,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 CREATE TABLE IF NOT EXISTS service_types (
   id VARCHAR(36) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,

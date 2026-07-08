@@ -19,6 +19,7 @@ router.put('/applications/:id/status',         adminCtrl.updateApplicationStatus
 router.post('/applications/:id/assign-amin',   adminCtrl.assignAmin);
 router.get('/applications/:id/timeline',       adminCtrl.getApplicationTimeline);
 router.get('/customers',                       adminCtrl.getCustomers);
+router.get('/customers/:id/details',           adminCtrl.getCustomerDetails);
 router.get('/amins',                           adminCtrl.getAmins);
 router.post('/amins',                          adminCtrl.createAmin);
 router.put('/amins/:id',                       adminCtrl.updateAmin);

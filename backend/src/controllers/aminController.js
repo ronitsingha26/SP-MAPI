@@ -63,13 +63,13 @@ exports.submitSurveyReport = async (req, res, next) => {
     let photos = [];
 
     if (req.files?.final_report?.[0]) {
-      final_report_url = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', req.files.final_report[0].path)}`;
+      final_report_url = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', req.files.final_report[0].path).replace(/\\/g, '/')}`;
     }
     if (req.files?.map_pdf?.[0]) {
-      map_pdf_url = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', req.files.map_pdf[0].path)}`;
+      map_pdf_url = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', req.files.map_pdf[0].path).replace(/\\/g, '/')}`;
     }
     if (req.files?.photos) {
-      photos = req.files.photos.map(f => `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', f.path)}`);
+      photos = req.files.photos.map(f => `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', f.path).replace(/\\/g, '/')}`);
     }
 
     // Get assignment to find application_id

@@ -2,16 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { GitBranch, Filter, Search, RefreshCw, ChevronDown, UserCheck } from 'lucide-react';
 import api from '../../utils/api';
 import AssignAminModal from '../../components/admin/AssignAminModal';
+import AminReportsViewer from '../../components/admin/AminReportsViewer';
+import ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';
 
 const STATUS_LABEL = {
-  submitted: 'Submitted', verification: 'Verification', processing: 'Processing',
+  pending: 'Submitted', under_review: 'Verification', in_progress: 'Processing',
   approved: 'Approved', rejected: 'Rejected', completed: 'Completed', assigned: 'Assigned'
 };
 const STATUS_COLOR = {
-  submitted: 'badge-grey', verification: 'badge-yellow', processing: 'badge-yellow',
+  pending: 'badge-grey', under_review: 'badge-yellow', in_progress: 'badge-yellow',
   approved: 'badge-green', rejected: 'badge-red', completed: 'badge-blue', assigned: 'badge-yellow'
 };
-const BANTWARA_STATUSES = ['submitted', 'verification', 'processing', 'approved', 'rejected', 'completed', 'assigned'];
+const BANTWARA_STATUSES = ['pending', 'under_review', 'in_progress', 'approved', 'rejected', 'completed', 'assigned'];
 
 export default function AdminBantwaraPage() {
   const [apps, setApps] = useState([]);
@@ -154,24 +156,24 @@ export default function AdminBantwaraPage() {
                     {expandedId === app.id && (
                       <tr key={`${app.id}-exp`} className="bg-brand-green-pale/30">
                         <td colSpan="7" className="p-4">
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
                             <div><span className="text-brand-text-muted text-xs">Email</span><p className="font-medium">{app.applicant_email || '—'}</p></div>
                             <div><span className="text-brand-text-muted text-xs">Payment</span><p className="font-medium capitalize">{app.payment_status || '—'}</p></div>
                             <div><span className="text-brand-text-muted text-xs">Service</span><p className="font-medium capitalize">Bantwara</p></div>
-                            <div>
-                              <span className="text-brand-text-muted text-xs">Actions</span>
-                              <div className="mt-1">
-                                {!app.amin_name && (
-                                  <button
-                                    onClick={() => setAssigningAppId(app.id)}
-                                    className="px-3 py-1.5 bg-brand-green text-white text-xs font-semibold rounded-lg hover:bg-brand-green-dark transition-colors flex items-center gap-1.5"
-                                  >
-                                    <UserCheck className="w-3.5 h-3.5" /> Assign Amin
-                                  </button>
-                                )}
-                              </div>
-                            </div>
+                            <div><span className="text-brand-text-muted text-xs">Updated</span><p className="font-medium">{app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-IN') : '—'}</p></div>
+                            <AminReportsViewer documents={app.documents || []} />
                           </div>
+                          <ApplicationDocumentsViewer documents={app.documents || []} />
+                          {!app.amin_name && (
+                            <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={() => setAssigningAppId(app.id)}
+                                className="px-3 py-1.5 bg-brand-green text-white text-xs font-semibold rounded-lg hover:bg-brand-green-dark transition-colors flex items-center gap-1.5"
+                              >
+                                <UserCheck className="w-3.5 h-3.5" /> Assign Amin
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )}

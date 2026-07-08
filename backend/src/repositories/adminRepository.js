@@ -162,6 +162,59 @@ class AdminRepository {
     return result.rows;
   }
 
+  async getCustomerDetails(customerId) {
+    // 1. Customer profile
+    const customerRes = await pool.query(
+      'SELECT id, name, mobile, email, district, status, created_at, customer_id_display FROM customers WHERE id = ?',
+      [customerId]
+    );
+    const customer = customerRes.rows[0];
+    if (!customer) throw new Error('Customer not found');
+
+    // 2. Applications (Mapi, Bantwara, Maps)
+    const appsRes = await pool.query(
+      `SELECT a.*, 
+              (SELECT name FROM amins am WHERE am.id = a.assigned_amin_id) AS amin_name
+       FROM applications a
+       WHERE a.customer_id = ? AND a.deleted_at IS NULL
+       ORDER BY a.created_at DESC`,
+      [customerId]
+    );
+    const applications = appsRes.rows;
+
+    // 3. Tool Orders
+    const toolsRes = await pool.query(
+      'SELECT * FROM tool_requests WHERE customer_id = ? ORDER BY created_at DESC',
+      [customerId]
+    );
+    const toolOrders = toolsRes.rows;
+
+    // 4. Documents & Reports
+    let documents = [];
+    if (applications.length > 0) {
+      const appIds = applications.map(app => app.id);
+      const docsRes = await pool.query(
+        'SELECT * FROM documents WHERE application_id IN (?) ORDER BY created_at DESC',
+        [appIds]
+      );
+      documents = docsRes.rows;
+      
+      // Group documents by application_id
+      const docsByApp = {};
+      documents.forEach(d => {
+        if (!docsByApp[d.application_id]) docsByApp[d.application_id] = [];
+        docsByApp[d.application_id].push(d);
+      });
+      
+      applications.forEach(a => {
+        a.documents = docsByApp[a.id] || [];
+      });
+    }
+
+    return { customer, applications, toolOrders };
+  }
+
+
   async getAmins(districts) {
     const result = await pool.query(
       `SELECT a.id, a.name, a.mobile, a.email, a.district_name, a.license_number, a.status,

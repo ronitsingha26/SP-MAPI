@@ -76,7 +76,7 @@ const navConfigs = {
           { to: '/admin/districts', label: 'Districts', icon: MapPin },
           { to: '/admin/users', label: 'All Users', icon: Users },
           { to: '/admin/financials', label: 'Financial Reports', icon: BarChart2 },
-          { to: '/admin/services-config', label: 'Service Config', icon: Settings },
+          { to: '/admin/services-config', label: 'Pricing & Tools', icon: Settings },
           { to: '/admin/permissions', label: 'Permissions', icon: Shield },
           { to: '/admin/audit', label: 'Audit Logs', icon: FileText },
           { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
@@ -126,7 +126,7 @@ const navConfigs = {
           { to: '/admin/districts', label: 'Districts', icon: MapPin },
           { to: '/admin/users', label: 'All Users', icon: Users },
           { to: '/admin/financials', label: 'Financial Reports', icon: BarChart2 },
-          { to: '/admin/services-config', label: 'Service Config', icon: Settings },
+          { to: '/admin/services-config', label: 'Pricing & Tools', icon: Settings },
           { to: '/admin/audit', label: 'Audit Logs', icon: FileText },
           { to: '/admin/broadcast', label: 'Broadcast', icon: Megaphone },
         ]

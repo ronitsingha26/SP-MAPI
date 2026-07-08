@@ -20,7 +20,7 @@ export default function CustomerToolsForm() {
   useEffect(() => {
     const fetchTools = async () => {
       try {
-        const res = await api.get('/public/tools');
+        const res = await api.get('/applications/public/tools');
         setToolsList(res.data.tools || []);
       } catch (err) {
         console.error(err);

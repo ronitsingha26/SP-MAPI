@@ -1,4 +1,5 @@
 const aminRepository = require('../repositories/aminRepository');
+const adminRepository = require('../repositories/adminRepository');
 const { AppError } = require('../middleware/errorHandler');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -10,7 +11,22 @@ class AminService {
     let params = [aminId];
     if (status) { conditions.push('a.status = ?'); params.push(status); }
 
-    return await aminRepository.getTasks(aminId, conditions, params);
+    const tasks = await aminRepository.getTasks(aminId, conditions, params);
+
+    if (tasks.length > 0) {
+      const appIds = tasks.map(t => t.id);
+      const docs = await adminRepository.getDocumentsForApplications(appIds);
+      const docsByApp = {};
+      docs.forEach(d => {
+        if (!docsByApp[d.application_id]) docsByApp[d.application_id] = [];
+        docsByApp[d.application_id].push(d);
+      });
+      tasks.forEach(t => {
+        t.documents = docsByApp[t.id] || [];
+      });
+    }
+
+    return tasks;
   }
 
   async updateTaskStatus(id, amin, status, remark) {

@@ -137,6 +137,11 @@ class AdminService {
     return await adminRepository.getCustomers(conditions, params);
   }
 
+  async getCustomerDetails(customerId) {
+    return await adminRepository.getCustomerDetails(customerId);
+  }
+
+
   async getAmins(adminId) {
     const districts = await adminRepository.getAdminDistricts(adminId);
     return await adminRepository.getAmins(districts);

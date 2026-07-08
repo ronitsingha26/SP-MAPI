@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Map, Filter, Search, RefreshCw, ChevronDown } from 'lucide-react';
+import { Map, Filter, Search, RefreshCw, ChevronDown, UserCheck } from 'lucide-react';
+import AssignAminModal from '../../components/admin/AssignAminModal';
 import api from '../../utils/api';
+import AminReportsViewer from '../../components/admin/AminReportsViewer';
+import ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';
 
 const STATUS_LABEL = {
-  submitted: 'Submitted', verification: 'Verification', map_preparation: 'Map Preparation',
-  ready: 'Ready', delivered: 'Delivered', completed: 'Completed', rejected: 'Rejected'
+  pending: 'Submitted', under_review: 'Verification', in_progress: 'Map Preparation',
+  approved: 'Ready', delivered: 'Delivered', completed: 'Completed', rejected: 'Rejected'
 };
 const STATUS_COLOR = {
-  submitted: 'badge-grey', verification: 'badge-yellow', map_preparation: 'badge-yellow',
-  ready: 'badge-green', delivered: 'badge-green', completed: 'badge-blue', rejected: 'badge-red'
+  pending: 'badge-grey', under_review: 'badge-yellow', in_progress: 'badge-blue',
+  approved: 'badge-green', delivered: 'badge-green', completed: 'badge-blue', rejected: 'badge-red'
 };
-const MAP_STATUSES = ['submitted', 'verification', 'map_preparation', 'ready', 'delivered', 'completed', 'rejected'];
+const MAP_STATUSES = ['pending', 'under_review', 'in_progress', 'approved', 'delivered', 'completed', 'rejected'];
 
 export default function AdminMapRequestsPage() {
   const [apps, setApps] = useState([]);
@@ -20,6 +23,7 @@ export default function AdminMapRequestsPage() {
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [assigningAppId, setAssigningAppId] = useState(null);
 
   const fetchApps = useCallback(async () => {
     setLoading(true);
@@ -152,12 +156,24 @@ export default function AdminMapRequestsPage() {
                     {expandedId === app.id && (
                       <tr key={`${app.id}-exp`} className="bg-blue-50/40">
                         <td colSpan="7" className="p-4">
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
                             <div><span className="text-brand-text-muted text-xs">Email</span><p className="font-medium">{app.applicant_email || '—'}</p></div>
                             <div><span className="text-brand-text-muted text-xs">Payment</span><p className="font-medium capitalize">{app.payment_status || '—'}</p></div>
                             <div><span className="text-brand-text-muted text-xs">Service</span><p className="font-medium">Map Copy</p></div>
                             <div><span className="text-brand-text-muted text-xs">Updated</span><p className="font-medium">{app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-IN') : '—'}</p></div>
+                            <AminReportsViewer documents={app.documents || []} />
                           </div>
+                          <ApplicationDocumentsViewer documents={app.documents || []} />
+                          {!app.amin_name && (
+                            <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={() => setAssigningAppId(app.id)}
+                                className="px-3 py-1.5 bg-brand-green text-white text-xs font-semibold rounded-lg hover:bg-brand-green-dark transition-colors flex items-center gap-1.5"
+                              >
+                                <UserCheck className="w-3.5 h-3.5" /> Assign Amin
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )}
@@ -172,6 +188,17 @@ export default function AdminMapRequestsPage() {
         )}
         <div className="mt-4 text-sm text-brand-text-muted">Total: {apps.length} requests</div>
       </div>
+      
+      {assigningAppId && (
+        <AssignAminModal
+          applicationId={assigningAppId}
+          onClose={() => setAssigningAppId(null)}
+          onSuccess={() => {
+            setAssigningAppId(null);
+            fetchApps();
+          }}
+        />
+      )}
     </div>
   );
 }

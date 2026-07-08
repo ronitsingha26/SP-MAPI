@@ -22,7 +22,11 @@ exports.getApplications = async (req, res, next) => {
 exports.updateApplicationStatus = async (req, res, next) => {
   try {
     const { status, remark } = req.body;
-    await adminService.updateApplicationStatus(req.params.id, status, remark, { ...req.user, ip: req.ip });
+    const adminUser = { ...req.user, ip: req.ip };
+    if (adminUser.role === 'superadmin') {
+      adminUser.id = null;
+    }
+    await adminService.updateApplicationStatus(req.params.id, status, remark, adminUser);
     res.json({ success: true, message: `Application status updated to ${status}.` });
   } catch (err) { next(err); }
 };
@@ -32,11 +36,13 @@ exports.assignAmin = async (req, res, next) => {
     const { amin_id, survey_date, survey_time, priority, remarks } = req.body;
     if (!amin_id) return next(new AppError('Amin ID is required.', 400));
 
+    const assigned_by = req.user.role === 'superadmin' ? null : req.user.id;
+
     // Use enhanced assignment service
     const result = await assignmentService.createAssignment({
       application_id: req.params.id,
       amin_id,
-      assigned_by: req.user.id,
+      assigned_by,
       survey_date, survey_time, priority, remarks
     });
 
@@ -48,6 +54,13 @@ exports.getCustomers = async (req, res, next) => {
   try {
     const customers = await adminService.getCustomers(req.user.id, req.query);
     res.json({ success: true, customers });
+  } catch (err) { next(err); }
+};
+
+exports.getCustomerDetails = async (req, res, next) => {
+  try {
+    const data = await adminService.getCustomerDetails(req.params.id);
+    res.json({ success: true, data });
   } catch (err) { next(err); }
 };
 
@@ -131,7 +144,8 @@ exports.updateToolsOrderStatus = async (req, res, next) => {
     if (!status) return next(new AppError('Status is required', 400));
     
     const toolRequestService = require('../services/toolRequestService');
-    await toolRequestService.updateToolRequestStatus(req.params.id, status, admin_remark, req.user.id);
+    const processedBy = req.user.role === 'superadmin' ? null : req.user.id;
+    await toolRequestService.updateToolRequestStatus(req.params.id, status, admin_remark, processedBy);
     res.json({ success: true, message: 'Tool order status updated.' });
   } catch (err) { next(err); }
 };

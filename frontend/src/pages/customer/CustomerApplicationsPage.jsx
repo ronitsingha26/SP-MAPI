@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, ClipboardList, Map, GitBranch, RefreshCw, Plus, Pencil, X, Save, ChevronDown, ChevronUp, AlertCircle, Wrench } from 'lucide-react';
-import api from '../../utils/api';
+import api, { getFileUrl } from '../../utils/api';
 
 const STATUS_LABEL = {
   submitted: 'Submitted', verification: 'Verification', processing: 'Processing',
@@ -316,7 +316,7 @@ function AppRow({ app, onEdit, onUpdate }) {
                     {app.documents.map(d => (
                       <a
                         key={d.id}
-                        href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${d.file_url}`}
+                        href={getFileUrl(d.file_url)}
                         target="_blank" rel="noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs bg-white border border-brand-green-light rounded-lg px-3 py-1.5 text-brand-green hover:bg-brand-green-pale transition-colors font-medium"
                       >

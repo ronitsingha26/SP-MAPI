@@ -55,3 +55,11 @@ export const removeToken = () => {
   localStorage.removeItem('spmapi_token');
   localStorage.removeItem('spmapi_user');
 };
+
+export const getFileUrl = (filePath) => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http')) return filePath;
+  const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+  const path = filePath.startsWith('/') ? filePath : `/${filePath}`;
+  return `${base}${path}`;
+};

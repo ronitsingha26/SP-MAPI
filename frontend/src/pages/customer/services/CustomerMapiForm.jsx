@@ -15,7 +15,7 @@ function FormField({ label, required, children }) {
   );
 }
 
-function FileUploadBox({ label, required, file, onChange, accept = '.pdf,.jpg,.jpeg,.png' }) {
+function FileUploadBox({ label, required, file, onChange, accept = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png' }) {
   return (
     <div>
       <label className="label">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>

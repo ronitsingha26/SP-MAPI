@@ -27,7 +27,14 @@ const storage = multer.diskStorage({
     cb(null, targetDir);
   },
   filename: (req, file, cb) => {
-    const ext  = path.extname(file.originalname).toLowerCase();
+    let ext  = path.extname(file.originalname).toLowerCase();
+    
+    if (!ext) {
+      if (file.mimetype === 'application/pdf') ext = '.pdf';
+      else if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') ext = '.jpg';
+      else if (file.mimetype === 'image/png') ext = '.png';
+    }
+    
     const uuid = uuidv4();
     cb(null, `${uuid}${ext}`);
   }
@@ -35,9 +42,13 @@ const storage = multer.diskStorage({
 
 // ── File Type Filter ──────────────────────────────────────────
 const fileFilter = (req, file, cb) => {
-  const allowed = ['.pdf', '.jpg', '.jpeg', '.png'];
+  const allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+  const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png'];
+  
   const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.includes(ext)) {
+  
+  // Verify using either extension or mimetype (handles cases where prod proxy strips extensions)
+  if (allowedExts.includes(ext) || allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error('Only PDF, JPG, JPEG, PNG files are allowed.'), false);

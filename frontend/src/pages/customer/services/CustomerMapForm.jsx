@@ -28,7 +28,7 @@ function FileUploadBox({ label, required, file, onChange }) {
         ) : (
           <><p className="text-sm font-medium text-brand-text">Click to upload</p><p className="text-xs text-brand-text-muted mt-1">PDF, JPG, PNG (max 5MB)</p></>
         )}
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={e => onChange(e.target.files[0] || null)} />
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" className="hidden" onChange={e => onChange(e.target.files[0] || null)} />
       </label>
     </div>
   );

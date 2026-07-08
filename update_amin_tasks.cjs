@@ -1,87 +1,47 @@
-import { useState, useEffect } from 'react';
-import { statusColor, statusLabel, serviceTypeLabel, formatDate } from '../../utils/helpers';
-import { MapPin, User, Clock, CheckCircle2, Upload, ChevronDown, RefreshCw } from 'lucide-react';
-import api from '../../utils/api';
-import ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';
+const fs = require('fs');
 
-export default function AminTasksPage() {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const [expandedId, setExpandedId] = useState(null);
-  const [reportFile, setReportFile] = useState(null);
-  const [statusUpdating, setStatusUpdating] = useState(false);
-  const [uploading, setUploading] = useState(false);
+let content = fs.readFileSync('frontend/src/pages/amin/AminTasksPage.jsx', 'utf8');
 
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get('/amin/tasks');
-      setTasks(res.data.tasks || []);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch tasks.');
-    } finally {
-      setLoading(false);
-    }
-  };
+// 1. Imports
+content = content.replace(
+  "import { User, MapPin, Clock, CheckCircle2, Upload, X, RefreshCw } from 'lucide-react';",
+  "import { User, MapPin, Clock, CheckCircle2, Upload, ChevronDown, RefreshCw } from 'lucide-react';\nimport ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';"
+);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+// 2. State
+content = content.replace(
+  "const [selectedTask, setSelectedTask] = useState(null);",
+  "const [expandedId, setExpandedId] = useState(null);"
+);
 
-  const handleStatusChange = async (taskId, newStatus) => {
+// 3. handleStatusChange
+content = content.replace(
+  /const handleStatusChange = async \(newStatus\) => \{[\s\S]*?setSelectedTask\(\{ \.\.\.selectedTask, status: newStatus \}\);\n\s*\}\n/m,
+  `const handleStatusChange = async (taskId, newStatus) => {
     setStatusUpdating(true);
     try {
-      await api.put(`/amin/tasks/${taskId}/status`, { status: newStatus });
+      await api.put(\`/amin/tasks/\${taskId}/status\`, { status: newStatus });
       setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-      fetchTasks();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update status');
-    } finally {
-      setStatusUpdating(false);
     }
-  };
+`
+);
 
-  const handleUpload = async (e, taskId) => {
+// 4. handleUpload
+content = content.replace(
+  /const handleUpload = async \(e\) => \{[\s\S]*?const res = await api\.post\(`\/amin\/tasks\/\$\{selectedTask\.id\}\/upload`, formData\);\n\s*setTasks\(tasks\.map\(t => t\.id === selectedTask\.id \? \{ \.\.\.t, report_url: res\.data\.file_url \} : t\)\);/m,
+  `const handleUpload = async (e, taskId) => {
     e.preventDefault();
-    if (!reportFile || !taskId) return;
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append('report', reportFile);
-      await api.post(`/amin/tasks/${taskId}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      alert('Report uploaded successfully!');
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, report_url: 'uploaded' } : t));
-      fetchTasks();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Upload failed');
-    } finally {
-      setUploading(false);
-      setReportFile(null);
-    }
-  };
+      const res = await api.post(\`/amin/tasks/\${taskId}/upload\`, formData);
+      setTasks(tasks.map(t => t.id === taskId ? { ...t, report_url: res.data.file_url } : t));`
+);
 
-  return (
-    <div className="animate-fade-in relative">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">My Tasks</h1>
-          <p className="page-subtitle">{tasks.length} total assigned tasks</p>
-        </div>
-      </div>
-
-      {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">⚠️ {error}</div>}
-
-      {loading ? (
-        <div className="flex justify-center p-12"><RefreshCw className="w-8 h-8 text-brand-green animate-spin" /></div>
-      ) : tasks.length === 0 ? (
-        <p className="text-center text-brand-text-muted p-12">No tasks assigned to you right now.</p>
-      ) : (
-        <div className="space-y-4">
-          {tasks.map(t => (
+// 5. Layout and Modal
+const mapRegex = /\{\s*tasks\.map\(t => \([\s\S]*?\)\s*\)\s*\}/m;
+const newMap = `{tasks.map(t => (
             <div key={t.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-4 hover:border-brand-green transition-all">
               {/* Collapsed Card */}
               <div 
@@ -102,9 +62,9 @@ export default function AminTasksPage() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-3">
-                  <span className={`${statusColor(t.status)} flex-shrink-0`}>{statusLabel(t.status)}</span>
+                  <span className={\`\${statusColor(t.status)} flex-shrink-0\`}>{statusLabel(t.status)}</span>
                   <button className="p-1.5 hover:bg-brand-green-pale rounded-lg text-brand-green">
-                    <ChevronDown className={`w-5 h-5 transition-transform ${expandedId === t.id ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={\`w-5 h-5 transition-transform \${expandedId === t.id ? 'rotate-180' : ''}\`} />
                   </button>
                 </div>
               </div>
@@ -139,14 +99,14 @@ export default function AminTasksPage() {
                         <button 
                           onClick={() => handleStatusChange(t.id, 'in_progress')}
                           disabled={t.status === 'in_progress' || statusUpdating}
-                          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${t.status === 'in_progress' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                          className={\`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors \${t.status === 'in_progress' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
                         >
                           Start Work
                         </button>
                         <button 
                           onClick={() => handleStatusChange(t.id, 'completed')}
                           disabled={t.status === 'completed' || statusUpdating}
-                          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${t.status === 'completed' ? 'bg-brand-green-pale text-brand-green border border-brand-green' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                          className={\`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors \${t.status === 'completed' ? 'bg-brand-green-pale text-brand-green border border-brand-green' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
                         >
                           Mark Completed
                         </button>
@@ -162,14 +122,14 @@ export default function AminTasksPage() {
                         </div>
                       ) : (
                         <form onSubmit={(e) => handleUpload(e, t.id)} className="space-y-3">
-                          <label htmlFor={`report-upload-${t.id}`} className="block cursor-pointer border-2 border-dashed border-brand-green-light rounded-xl p-4 text-center hover:bg-brand-green-pale/20 transition-colors bg-white">
+                          <label htmlFor={\`report-upload-\${t.id}\`} className="block cursor-pointer border-2 border-dashed border-brand-green-light rounded-xl p-4 text-center hover:bg-brand-green-pale/20 transition-colors bg-white">
                             <Upload className="w-6 h-6 text-brand-green mx-auto mb-2" />
                             <input 
                               type="file" 
                               accept=".pdf,.jpg,.jpeg,.png"
                               onChange={e => setReportFile(e.target.files?.[0])}
                               className="hidden" 
-                              id={`report-upload-${t.id}`}
+                              id={\`report-upload-\${t.id}\`}
                             />
                             <span className="block text-sm font-medium text-brand-text hover:text-brand-green">
                               {reportFile ? reportFile.name : 'Click to select report file (PDF/Image)'}
@@ -186,11 +146,14 @@ export default function AminTasksPage() {
                 </div>
               )}
             </div>
-          ))}
-        </div>
-      )}
+          ))}`;
 
-      
-    </div>
-  );
-}
+content = content.replace(mapRegex, newMap);
+
+// Remove the modal entirely
+content = content.replace(/\{\/\* Task Detail Modal \*\/\}[\s\S]*?(?=\s*<\/div>\s*\)\;\s*\})/m, '');
+
+// Fix grid-cols of the list
+content = content.replace(/<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">/, '<div className="space-y-4">');
+
+fs.writeFileSync('frontend/src/pages/amin/AminTasksPage.jsx', content);

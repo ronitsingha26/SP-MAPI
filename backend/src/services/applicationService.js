@@ -26,7 +26,7 @@ class ApplicationService {
       else if (fieldname.includes('vanshawali')) docType = 'vanshawali';
       else if (fieldname.includes('khatiyan')) docType = 'khatiyan';
       
-      const fileUrl = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', file.path)}`;
+      const fileUrl = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', file.path).replace(/\\/g, '/')}`;
       const docId = uuidv4();
       
       await applicationRepository.createDocument({

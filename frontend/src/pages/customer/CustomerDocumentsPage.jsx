@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Upload, FileText, CheckCircle2, Clock, XCircle, Plus, RefreshCw, Download } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
-import api from '../../utils/api';
+import api, { getFileUrl } from '../../utils/api';
 
 const statusIcon = { approved: CheckCircle2, pending: Clock, rejected: XCircle };
 const statusClass = { approved: 'text-brand-green', pending: 'text-yellow-500', rejected: 'text-red-500' };
@@ -122,7 +122,7 @@ export default function CustomerDocumentsPage() {
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </div>
                     {doc.file_url && (
-                      <a href={`http://localhost:5000${doc.file_url}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-brand-green bg-brand-green-pale px-2 py-1 rounded-lg hover:bg-brand-green-light transition-colors">
+                      <a href={getFileUrl(doc.file_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-brand-green bg-brand-green-pale px-2 py-1 rounded-lg hover:bg-brand-green-light transition-colors">
                         <Download className="w-3 h-3" /> View / Download
                       </a>
                     )}
