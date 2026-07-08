@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
   const adminLogin = async (email, password) => {
     setAuthLoading(true);
     try {
-      const res = await api.post('/auth/admin/login', { email, password });
+      const res = await api.post('/auth/portal/login', { email, password });
       const { token, user } = res.data;
       saveToken(token);
       setCurrentUser(user);

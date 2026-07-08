@@ -1,67 +1,67 @@
 {
-  "hash": "f63ac988",
-  "configHash": "ee8cbdc8",
+  "hash": "9b02b74d",
+  "configHash": "2c841885",
   "lockfileHash": "682015ce",
-  "browserHash": "4a5af4cf",
+  "browserHash": "f58a4b22",
   "optimized": {
     "react": {
       "src": "../../node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "a31b7df4",
+      "fileHash": "a07d31d4",
       "needsInterop": true
     },
     "react-dom": {
       "src": "../../node_modules/react-dom/index.js",
       "file": "react-dom.js",
-      "fileHash": "09fd64f2",
+      "fileHash": "b0841d6a",
       "needsInterop": true
     },
     "react/jsx-dev-runtime": {
       "src": "../../node_modules/react/jsx-dev-runtime.js",
       "file": "react_jsx-dev-runtime.js",
-      "fileHash": "a692b5f1",
+      "fileHash": "e9dd174d",
       "needsInterop": true
     },
     "react/jsx-runtime": {
       "src": "../../node_modules/react/jsx-runtime.js",
       "file": "react_jsx-runtime.js",
-      "fileHash": "f5ab903d",
+      "fileHash": "11da44ec",
       "needsInterop": true
     },
     "axios": {
       "src": "../../node_modules/axios/index.js",
       "file": "axios.js",
-      "fileHash": "8f348bc5",
+      "fileHash": "63dff0e6",
       "needsInterop": false
     },
     "gsap": {
       "src": "../../node_modules/gsap/index.js",
       "file": "gsap.js",
-      "fileHash": "63b31142",
+      "fileHash": "67a9b223",
       "needsInterop": false
     },
     "lucide-react": {
       "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
       "file": "lucide-react.js",
-      "fileHash": "3a70fc43",
+      "fileHash": "e3ee9013",
       "needsInterop": false
     },
     "react-dom/client": {
       "src": "../../node_modules/react-dom/client.js",
       "file": "react-dom_client.js",
-      "fileHash": "5108037d",
+      "fileHash": "acc0001c",
       "needsInterop": true
     },
     "react-router-dom": {
       "src": "../../node_modules/react-router-dom/dist/index.js",
       "file": "react-router-dom.js",
-      "fileHash": "5cbf84c2",
+      "fileHash": "0f277c03",
       "needsInterop": false
     },
     "recharts": {
       "src": "../../node_modules/recharts/es6/index.js",
       "file": "recharts.js",
-      "fileHash": "e9e11d6f",
+      "fileHash": "d94cc244",
       "needsInterop": false
     }
   },
