@@ -4,8 +4,8 @@
 -- Version: 2.0 | Date: July 2026 (Full Overhaul)
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS spmapi_db;
-USE spmapi_db;
+-- CREATE DATABASE IF NOT EXISTS spmapi_db;
+-- USE spmapi_db;
 
 -- ============================================================
 -- MASTER DATA (Location & Hierarchy)
