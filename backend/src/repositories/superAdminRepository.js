@@ -6,10 +6,12 @@ class SuperAdminRepository {
       SELECT
         (SELECT COUNT(*) FROM customers WHERE deleted_at IS NULL) AS total_users,
         (SELECT COUNT(*) FROM amins WHERE deleted_at IS NULL AND status='active') AS active_amins,
-        (SELECT COUNT(*) FROM applications WHERE deleted_at IS NULL AND status IN ('submitted','pending','verification')) AS pending_services,
+        (SELECT COUNT(*) FROM applications WHERE deleted_at IS NULL AND status IN ('submitted','pending','verification')) +
+        (SELECT COUNT(*) FROM tool_requests WHERE status = 'pending') AS pending_services,
         (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status='success') AS total_revenue,
         (SELECT COUNT(*) FROM admins WHERE deleted_at IS NULL AND status='active') AS total_admins,
-        (SELECT COUNT(*) FROM applications WHERE deleted_at IS NULL) AS total_applications
+        (SELECT COUNT(*) FROM applications WHERE deleted_at IS NULL) +
+        (SELECT COUNT(*) FROM tool_requests) AS total_applications
     `);
     
     const monthlyRevenue = await pool.query(`
@@ -24,6 +26,9 @@ class SuperAdminRepository {
       SELECT service_type AS name, COUNT(*) AS value
       FROM applications WHERE deleted_at IS NULL
       GROUP BY service_type
+      UNION ALL
+      SELECT 'Tool Order' AS name, COUNT(*) AS value
+      FROM tool_requests
     `);
     
     const bookingByType = await pool.query(`

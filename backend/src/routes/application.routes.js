@@ -77,6 +77,6 @@ router.get('/public/tools', miscCtrl.getPublicTools);
 router.get('/track/:app_id', appCtrl.trackApplication);
 
 // ── Get single application by id or app_id (must be last) ──
-router.get('/:id', appCtrl.getApplication);
+router.get('/:id', protect, appCtrl.getApplication);
 
 module.exports = router;

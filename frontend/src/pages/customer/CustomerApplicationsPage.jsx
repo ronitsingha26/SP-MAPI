@@ -146,9 +146,7 @@ function AppRow({ app, onEdit, onUpdate, onWithdraw }) {
   const [isPaying, setIsPaying] = useState(false);
   const canEdit = EDITABLE_STATUSES.includes(app.status);
   
-  const canWithdraw = app.service_type === 'tools' 
-    ? ['pending', 'approved', 'dispatched'].includes(app.status)
-    : ['submitted', 'pending', 'assigned'].includes(app.status);
+  const canWithdraw = ['submitted', 'pending'].includes(app.status);
 
   const handlePayNow = async () => {
     setIsPaying(true);
@@ -257,15 +255,7 @@ function AppRow({ app, onEdit, onUpdate, onWithdraw }) {
                 <Pencil className="w-3.5 h-3.5" />
               </button>
             )}
-            {canWithdraw && (
-              <button
-                onClick={() => onWithdraw(app)}
-                title="Withdraw Application"
-                className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-              </button>
-            )}
+
             <button
               onClick={() => setExpanded(e => !e)}
               title="View Details"
@@ -298,6 +288,15 @@ function AppRow({ app, onEdit, onUpdate, onWithdraw }) {
                       className="bg-brand-green text-white px-3 py-1 rounded-md text-xs font-semibold hover:bg-green-700 transition-colors shadow-sm disabled:opacity-50"
                     >
                       {isPaying ? 'Processing...' : 'Pay Now'}
+                    </button>
+                  )}
+                  {canWithdraw && (
+                    <button
+                      onClick={() => onWithdraw(app)}
+                      className="border border-red-200 text-red-600 bg-white hover:bg-red-50 hover:border-red-300 px-3 py-1 rounded-md text-xs font-semibold transition-colors shadow-sm flex items-center gap-1.5 ml-auto"
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      Withdraw Application
                     </button>
                   )}
                 </div>

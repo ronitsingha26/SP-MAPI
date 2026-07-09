@@ -1,0 +1,29 @@
+--- backend/src/routes/admin.routes.js
++++ backend/src/routes/admin.routes.js
+@@ -72,24 +72,7 @@
+ router.get('/export/:type',                    adminCtrl.exportData);
+ 
+ // Super export (CSV)
+-router.get('/super-export/:type', async (req, res, next) => {
+-  try {
+-    const superAdminService = require('../services/superAdminService');
+-    const type = req.params.type;
+-    let data = [];
+-    if (type === 'payments') {
+-      const result = await superAdminService.getPayments({ limit: 10000, page: 1 });
+-      data = result.payments || result || [];
+-    } else if (type === 'users') {
+-      const usersData = await superAdminService.getAllUsers({ limit: 10000, page: 1, type: 'customers' });
+-      data = usersData.users || [];
+-    } else {
+-      return next(require('../middleware/errorHandler').AppError('Invalid export type', 400));
+-    }
+-    const csv = jsonToCsv(data);
+-    res.header('Content-Type', 'text/csv');
+-    res.attachment(`${type}_export_${Date.now()}.csv`);
+-    res.send(csv);
+-  } catch (err) { next(err); }
+-});
++router.get('/super-export/:type',              adminCtrl.superExport);
+ 
+ // ── Tools Orders ──

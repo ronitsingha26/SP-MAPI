@@ -12,17 +12,31 @@ exports.getCustomerInvoices = async (req, res, next) => {
 exports.getInvoiceById = async (req, res, next) => {
   try {
     const invoice = await invoiceService.getInvoiceById(req.params.id);
-    // Ensure the user owns this invoice if they are a customer
+    
     if (req.user.role === 'customer' && invoice.customer_id !== req.user.id) {
       throw new AppError('Not authorized to view this invoice', 403);
     }
+    if (req.user.role === 'amin') {
+      throw new AppError('Not authorized to view invoices', 403);
+    }
+    if (req.user.role === 'admin') {
+      const applicationService = require('../services/applicationService');
+      const app = await applicationService.getApplication(invoice.application_id, req.user);
+      if (!app) throw new AppError('Not authorized', 403);
+    }
+
     res.json({ success: true, invoice });
   } catch (err) { next(err); }
 };
 
 exports.getAllInvoices = async (req, res, next) => {
   try {
-    const invoices = await invoiceService.getAllInvoices();
+    let adminDistricts = null;
+    if (req.user.role === 'admin') {
+       const adminRepository = require('../repositories/adminRepository');
+       adminDistricts = await adminRepository.getAdminDistricts(req.user.id);
+    }
+    const invoices = await invoiceService.getAllInvoices(adminDistricts);
     res.json({ success: true, invoices });
   } catch (err) { next(err); }
 };

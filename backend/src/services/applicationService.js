@@ -168,9 +168,25 @@ class ApplicationService {
     }
   }
 
-  async getApplication(id) {
+  async getApplication(id, actor) {
     const app = await applicationRepository.getApplicationByIdOrAppId(id);
     if (!app) throw new AppError('Application not found.', 404);
+
+    if (actor) {
+      if (actor.role === 'customer' && app.customer_id !== actor.id) {
+        throw new AppError('Unauthorized access to application.', 403);
+      }
+      if (actor.role === 'amin' && app.assigned_amin_id !== actor.id) {
+        throw new AppError('Unauthorized access to application.', 403);
+      }
+      if (actor.role === 'admin') {
+        const adminRepository = require('../repositories/adminRepository');
+        const districts = await adminRepository.getAdminDistricts(actor.id);
+        if (districts[0] !== '__NONE__' && !districts.includes(app.district)) {
+          throw new AppError('Unauthorized access to application in another district.', 403);
+        }
+      }
+    }
     return app;
   }
 
@@ -221,7 +237,7 @@ class ApplicationService {
     try {
       await client.beginTransaction();
 
-      const [appRows] = await client.query('SELECT * FROM applications WHERE id = ? AND customer_id = ? FOR UPDATE', [id, customer_id]);
+      const { rows: appRows } = await client.query('SELECT * FROM applications WHERE id = ? AND customer_id = ? FOR UPDATE', [id, customer_id]);
       if (appRows.length === 0) {
         throw new AppError('Application not found or not authorized.', 404);
       }

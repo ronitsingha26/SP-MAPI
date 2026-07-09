@@ -180,8 +180,17 @@ class AdminService {
   }
 
   // ── Merged SuperAdmin Methods ─────────────────────────────────
-  async getSuperDashboard() {
-    return await superAdminService.getDashboard();
+  async getSuperDashboard(actor) {
+    if (actor && actor.role === 'superadmin') {
+      return await superAdminService.getDashboard();
+    }
+    // For regular admins, scope financial reports to their district, mapping exactly to SuperAdmin shape
+    const districts = await adminRepository.getAdminDistricts(actor.id);
+    if (!districts || districts[0] === '__NONE__') {
+      return { stats: {}, monthly_revenue: [], service_by_type: [], booking_by_type: [] };
+    }
+    const dashboardData = await adminRepository.getFinancialDashboardStats(districts);
+    return dashboardData;
   }
 
   async getAdmins() {
@@ -261,6 +270,10 @@ class AdminService {
       }
     };
 
+    // First execute atomic database deletion transaction
+    await adminRepository.deleteApplication(applicationId);
+
+    // If DB deletion succeeds, safely remove physical files
     docs.forEach(d => deleteFile(d.file_path));
     reports.forEach(r => {
       deleteFile(r.final_report_url);
@@ -272,8 +285,6 @@ class AdminService {
         } catch(e) {}
       }
     });
-
-    await adminRepository.deleteApplication(applicationId);
   }
 
   async deleteToolRequest(toolRequestId) {

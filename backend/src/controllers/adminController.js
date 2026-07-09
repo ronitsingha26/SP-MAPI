@@ -170,7 +170,7 @@ exports.getEnquiries = async (req, res, next) => {
 
 exports.getSuperDashboard = async (req, res, next) => {
   try {
-    const data = await adminService.getSuperDashboard();
+    const data = await adminService.getSuperDashboard(req.user);
     res.json({ success: true, ...data });
   } catch (err) { next(err); }
 };

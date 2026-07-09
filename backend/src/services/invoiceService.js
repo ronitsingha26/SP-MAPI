@@ -41,8 +41,8 @@ class InvoiceService {
     return await invoiceRepository.getInvoicesByCustomer(customerId);
   }
 
-  async getAllInvoices() {
-    return await invoiceRepository.getAllInvoices();
+  async getAllInvoices(adminDistricts = null) {
+    return await invoiceRepository.getAllInvoices(adminDistricts);
   }
 
   async markAsPaid(id, paymentId) {

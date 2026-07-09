@@ -46,33 +46,33 @@ router.put('/bookings/:id/status',  bookCtrl.updateBookingStatus);
 // ── Merged SuperAdmin Routes (all now accessible to admin role) ──
 
 // Master dashboard (full platform stats)
-router.get('/super-dashboard',      adminCtrl.getSuperDashboard);
+router.get('/super-dashboard',      authorize('superadmin'), adminCtrl.getSuperDashboard);
 
 // Manage Admins
-router.get('/admins',               adminCtrl.getAdmins);
-router.post('/admins',              adminCtrl.createAdmin);
-router.put('/admins/:id',           adminCtrl.updateAdmin);
-router.delete('/admins/:id',        adminCtrl.deleteAdmin);
+router.get('/admins',               authorize('superadmin'), adminCtrl.getAdmins);
+router.post('/admins',              authorize('superadmin'), adminCtrl.createAdmin);
+router.put('/admins/:id',           authorize('superadmin'), adminCtrl.updateAdmin);
+router.delete('/admins/:id',        authorize('superadmin'), adminCtrl.deleteAdmin);
 
 // All Users
-router.get('/users',                adminCtrl.getAllUsers);
+router.get('/users',                authorize('superadmin'), adminCtrl.getAllUsers);
 
 // Audit Logs
-router.get('/audit-logs',           adminCtrl.getAuditLogs);
+router.get('/audit-logs',           authorize('superadmin'), adminCtrl.getAuditLogs);
 
 // Districts
-router.get('/districts',            adminCtrl.getDistricts);
-router.post('/districts',           adminCtrl.createDistrict);
-router.put('/districts/:id',        adminCtrl.updateDistrict);
+router.get('/districts',            authorize('superadmin'), adminCtrl.getDistricts);
+router.post('/districts',           authorize('superadmin'), adminCtrl.createDistrict);
+router.put('/districts/:id',        authorize('superadmin'), adminCtrl.updateDistrict);
 
 // All Payments (platform-wide)
-router.get('/all-payments',         adminCtrl.getAllPayments);
+router.get('/all-payments',         authorize('superadmin'), adminCtrl.getAllPayments);
 
 // Broadcast
-router.post('/broadcast',           adminCtrl.broadcast);
+router.post('/broadcast',           authorize('superadmin'), adminCtrl.broadcast);
 
 // Super export (CSV)
-router.get('/super-export/:type', async (req, res, next) => {
+router.get('/super-export/:type', authorize('superadmin'), async (req, res, next) => {
   try {
     const superAdminService = require('../services/superAdminService');
     const type = req.params.type;
@@ -101,45 +101,45 @@ router.put('/tools-orders/:id',      adminCtrl.updateToolsOrderStatus);
 router.get('/enquiries',             adminCtrl.getEnquiries);
 
 // ── Services & Pricing ──
-router.get('/services',              paCtrl.getServiceTypes);
-router.post('/services',             paCtrl.createServiceType);
-router.put('/services/:id',          paCtrl.updateServiceType);
-router.delete('/services/:id',       paCtrl.deleteServiceType);
+router.get('/services',              authorize('superadmin'), paCtrl.getServiceTypes);
+router.post('/services',             authorize('superadmin'), paCtrl.createServiceType);
+router.put('/services/:id',          authorize('superadmin'), paCtrl.updateServiceType);
+router.delete('/services/:id',       authorize('superadmin'), paCtrl.deleteServiceType);
 
-router.get('/tools',                 paCtrl.getTools);
-router.post('/tools',                paCtrl.createTool);
-router.put('/tools/:id',             paCtrl.updateTool);
-router.delete('/tools/:id',          paCtrl.deleteTool);
+router.get('/tools',                 authorize('superadmin'), paCtrl.getTools);
+router.post('/tools',                authorize('superadmin'), paCtrl.createTool);
+router.put('/tools/:id',             authorize('superadmin'), paCtrl.updateTool);
+router.delete('/tools/:id',          authorize('superadmin'), paCtrl.deleteTool);
 
-router.get('/pricing-rules',         paCtrl.getPricingRules);
-router.post('/pricing-rules',        paCtrl.createPricingRule);
-router.put('/pricing-rules/:id',     paCtrl.updatePricingRule);
-router.delete('/pricing-rules/:id',  paCtrl.deletePricingRule);
+router.get('/pricing-rules',         authorize('superadmin'), paCtrl.getPricingRules);
+router.post('/pricing-rules',        authorize('superadmin'), paCtrl.createPricingRule);
+router.put('/pricing-rules/:id',     authorize('superadmin'), paCtrl.updatePricingRule);
+router.delete('/pricing-rules/:id',  authorize('superadmin'), paCtrl.deletePricingRule);
 
 // ── Location Hierarchy ──
-router.get('/blocks',                laCtrl.getBlocks);
-router.post('/blocks',               laCtrl.createBlock);
-router.put('/blocks/:id',            laCtrl.updateBlock);
-router.delete('/blocks/:id',         laCtrl.deleteBlock);
+router.get('/blocks',                authorize('superadmin'), laCtrl.getBlocks);
+router.post('/blocks',               authorize('superadmin'), laCtrl.createBlock);
+router.put('/blocks/:id',            authorize('superadmin'), laCtrl.updateBlock);
+router.delete('/blocks/:id',         authorize('superadmin'), laCtrl.deleteBlock);
 
-router.get('/panchayats',            laCtrl.getPanchayats);
-router.post('/panchayats',           laCtrl.createPanchayat);
-router.put('/panchayats/:id',        laCtrl.updatePanchayat);
-router.delete('/panchayats/:id',     laCtrl.deletePanchayat);
+router.get('/panchayats',            authorize('superadmin'), laCtrl.getPanchayats);
+router.post('/panchayats',           authorize('superadmin'), laCtrl.createPanchayat);
+router.put('/panchayats/:id',        authorize('superadmin'), laCtrl.updatePanchayat);
+router.delete('/panchayats/:id',     authorize('superadmin'), laCtrl.deletePanchayat);
 
-router.get('/villages',              laCtrl.getVillages);
-router.post('/villages',             laCtrl.createVillage);
-router.put('/villages/:id',          laCtrl.updateVillage);
-router.delete('/villages/:id',       laCtrl.deleteVillage);
+router.get('/villages',              authorize('superadmin'), laCtrl.getVillages);
+router.post('/villages',             authorize('superadmin'), laCtrl.createVillage);
+router.put('/villages/:id',          authorize('superadmin'), laCtrl.updateVillage);
+router.delete('/villages/:id',       authorize('superadmin'), laCtrl.deleteVillage);
 
 // ── RBAC (Roles & Permissions) ──
-router.get('/roles',                 rbacCtrl.getRoles);
-router.get('/roles/:id',             rbacCtrl.getRole);
-router.post('/roles',                rbacCtrl.createRole);
-router.put('/roles/:id',             rbacCtrl.updateRole);
-router.delete('/roles/:id',          rbacCtrl.deleteRole);
+router.get('/roles',                 authorize('superadmin'), rbacCtrl.getRoles);
+router.get('/roles/:id',             authorize('superadmin'), rbacCtrl.getRole);
+router.post('/roles',                authorize('superadmin'), rbacCtrl.createRole);
+router.put('/roles/:id',             authorize('superadmin'), rbacCtrl.updateRole);
+router.delete('/roles/:id',          authorize('superadmin'), rbacCtrl.deleteRole);
 
-router.get('/permissions',           rbacCtrl.getPermissions);
-router.post('/permissions',          rbacCtrl.createPermission);
+router.get('/permissions',           authorize('superadmin'), rbacCtrl.getPermissions);
+router.post('/permissions',          authorize('superadmin'), rbacCtrl.createPermission);
 
 module.exports = router;

@@ -73,7 +73,7 @@ exports.submitToolRequest = async (req, res, next) => {
 
 exports.getApplication = async (req, res, next) => {
   try {
-    const application = await applicationService.getApplication(req.params.id);
+    const application = await applicationService.getApplication(req.params.id, req.user);
     res.json({ success: true, application });
   } catch (err) {
     next(err);
@@ -138,7 +138,7 @@ exports.trackApplication = async (req, res, next) => {
 
 exports.getApplicationTimeline = async (req, res, next) => {
   try {
-    const timeline = await activityLogService.getTimeline(req.params.id);
+    const timeline = await activityLogService.getTimeline(req.params.id, req.user);
     res.json({ success: true, timeline });
   } catch (err) {
     next(err);

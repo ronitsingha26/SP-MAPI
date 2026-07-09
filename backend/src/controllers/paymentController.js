@@ -19,7 +19,7 @@ exports.createOrder = async (req, res, next) => {
     }
 
     // Verify application belongs to customer and is unpaid
-    const [apps] = await db.query(
+    const { rows: apps } = await db.query(
       `SELECT * FROM applications WHERE id = ? AND customer_id = ?`,
       [application_id, customer_id]
     );
@@ -110,8 +110,8 @@ exports.verifyPayment = async (req, res, next) => {
     await db.query(
       `UPDATE payments 
        SET status = 'success', razorpay_payment_id = ?, razorpay_signature = ?, paid_at = NOW() 
-       WHERE razorpay_order_id = ?`,
-      [razorpay_payment_id, razorpay_signature, razorpay_order_id]
+       WHERE razorpay_order_id = ? AND customer_id = ?`,
+      [razorpay_payment_id, razorpay_signature, razorpay_order_id, customer_id]
     );
 
     // Update application payment status

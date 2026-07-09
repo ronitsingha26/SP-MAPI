@@ -27,7 +27,11 @@ class ActivityLogService {
   /**
    * Get timeline for an application
    */
-  async getTimeline(application_id) {
+  async getTimeline(application_id, actor) {
+    if (actor) {
+      const applicationService = require('./applicationService');
+      await applicationService.getApplication(application_id, actor);
+    }
     const result = await pool.query(
       `SELECT id, action, performed_by, performer_type, performer_name,
               old_status, new_status, remarks, created_at

@@ -39,16 +39,22 @@ class InvoiceRepository {
     return res.rows;
   }
 
-  async getAllInvoices() {
-    const res = await pool.query(`
+  async getAllInvoices(adminDistricts = null) {
+    let sql = `
       SELECT i.*, 
              c.name as customer_name, c.mobile as customer_phone,
-             a.service_type as application_type
+             a.service_type as application_type, a.district
       FROM invoices i 
       JOIN customers c ON i.customer_id = c.id
       JOIN applications a ON i.application_id = a.id
-      ORDER BY i.issued_at DESC
-    `);
+    `;
+    let params = [];
+    if (adminDistricts && adminDistricts.length > 0 && adminDistricts[0] !== '__NONE__') {
+      sql += ` WHERE a.district IN (?)`;
+      params.push(adminDistricts);
+    }
+    sql += ` ORDER BY i.issued_at DESC`;
+    const res = await pool.query(sql, params);
     return res.rows;
   }
 
