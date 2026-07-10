@@ -291,3 +291,35 @@ exports.getApplicationTimeline = async (req, res, next) => {
     res.json({ success: true, timeline });
   } catch (err) { next(err); }
 };
+
+// ── AMIN APPLICATIONS ──────────────────────────────────────
+exports.getAminApplications = async (req, res, next) => {
+  try {
+    const aminRecruitmentService = require('../services/aminRecruitmentService');
+    const apps = await aminRecruitmentService.getAllApplications();
+    res.json({ success: true, applications: apps });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.reviewAminApplication = async (req, res, next) => {
+  try {
+    const aminRecruitmentService = require('../services/aminRecruitmentService');
+    const { status, admin_remark } = req.body;
+    const result = await aminRecruitmentService.reviewApplication(req.params.id, status, admin_remark);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteAminApplication = async (req, res, next) => {
+  try {
+    const aminRecruitmentService = require('../services/aminRecruitmentService');
+    await aminRecruitmentService.deleteApplication(req.params.id);
+    res.json({ success: true, message: 'Amin Job Application deleted successfully.' });
+  } catch (err) {
+    next(err);
+  }
+};

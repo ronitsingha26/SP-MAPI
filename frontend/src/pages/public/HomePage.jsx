@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, ArrowRight, Search, Users, Star, Phone, CheckCircle2, TrendingUp, Shield, Leaf, ClipboardCheck, AlertCircle, Loader2, ChevronDown, Send, RefreshCw, Mail } from 'lucide-react';
 import { services, testimonials } from '../../data/index';
 import { useLanguage } from '../../context/LanguageContext';
@@ -99,6 +99,7 @@ function RequestStatusSection({ t }) {
           id: app.app_id,
           service: app.service_type === 'mapi' ? 'Mapi Registration'
                  : app.service_type === 'bantwara' ? 'Bantwara Registration'
+                 : app.service_type === 'Amin Recruitment' ? 'Amin Recruitment'
                  : 'Map Request',
           status: app.status,
           date: app.created_at ? new Date(app.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
@@ -106,6 +107,8 @@ function RequestStatusSection({ t }) {
           district: app.district || '—',
           remarks: app.admin_remark || 'No remarks yet.',
           updated_at: app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-IN') : '—',
+          applicantName: app.applicant_name || '—',
+          mobile: app.mobile || '—'
         });
       } else {
         setResult('not_found');
@@ -211,45 +214,96 @@ function RequestStatusSection({ t }) {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                    <div className="space-y-1">
-                      <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_service_label')}</span>
-                      <p className="font-medium text-white text-base">{result.service}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_status_label')}</span>
-                      <div>
-                        <span className={`inline-flex px-3 py-1 text-xs font-bold uppercase rounded-full ${result.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : result.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}>
-                          {statusConfig[result.status]?.label || result.status}
-                        </span>
+                  {result.service === 'Amin Recruitment' ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_service_label')}</span>
+                        <p className="font-medium text-white text-base">{result.service}</p>
                       </div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_date_label')}</span>
-                      <p className="font-medium text-gray-200 text-sm flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>
-                        {result.date}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('detail_district')}</span>
-                      <p className="font-medium text-gray-200 text-sm">{result.district}</p>
-                    </div>
-                    <div className="space-y-1 sm:col-span-2 bg-white/5 p-4 rounded-xl border border-white/5">
-                      <span className="text-brand-green-light text-xs font-semibold uppercase tracking-wider block mb-2">{t('request_assigned_amin')}</span>
-                      <div className="flex justify-between items-center">
-                        <p className="font-bold text-white text-base">{result.amin}</p>
-                        <div className="text-right">
-                          <span className="text-gray-400 text-[10px] uppercase tracking-wider block mb-0.5">{t('request_survey_time')}</span>
-                          <p className="font-medium text-gray-200 text-sm">{result.surveyTime || '—'}</p>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_status_label')}</span>
+                        <div>
+                          <span className={`inline-flex px-3 py-1 text-xs font-bold uppercase rounded-full ${result.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : result.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                            {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
+                          </span>
                         </div>
                       </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Applied Date</span>
+                        <p className="font-medium text-gray-200 text-sm flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>
+                          {result.date}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Applicant Name</span>
+                        <p className="font-medium text-gray-200 text-sm">{result.applicantName}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Mobile Number</span>
+                        <p className="font-medium text-gray-200 text-sm">{result.mobile}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('detail_district')}</span>
+                        <p className="font-medium text-gray-200 text-sm">{result.district}</p>
+                      </div>
+                      
+                      <div className="sm:col-span-2 bg-white/5 p-4 rounded-xl border border-white/5 mt-2">
+                        <p className="text-white text-sm">
+                          {result.status === 'pending' ? 'Your application has been received and is currently under review.' :
+                           result.status === 'approved' ? 'Congratulations! Your Amin application has been approved.' :
+                           'Your Amin application has been rejected.'}
+                        </p>
+                      </div>
+
+                      {result.remarks && result.remarks !== 'No remarks yet.' && (
+                        <div className="sm:col-span-2 pt-2">
+                          <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-2">{t('request_remarks')}</span>
+                          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5 italic">"{result.remarks}"</p>
+                        </div>
+                      )}
                     </div>
-                    <div className="sm:col-span-2 pt-2">
-                      <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-2">{t('request_remarks')}</span>
-                      <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5 italic">"{result.remarks}"</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_service_label')}</span>
+                        <p className="font-medium text-white text-base">{result.service}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_status_label')}</span>
+                        <div>
+                          <span className={`inline-flex px-3 py-1 text-xs font-bold uppercase rounded-full ${result.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : result.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}>
+                            {statusConfig[result.status]?.label || result.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('request_date_label')}</span>
+                        <p className="font-medium text-gray-200 text-sm flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>
+                          {result.date}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{t('detail_district')}</span>
+                        <p className="font-medium text-gray-200 text-sm">{result.district}</p>
+                      </div>
+                      <div className="space-y-1 sm:col-span-2 bg-white/5 p-4 rounded-xl border border-white/5">
+                        <span className="text-brand-green-light text-xs font-semibold uppercase tracking-wider block mb-2">{t('request_assigned_amin')}</span>
+                        <div className="flex justify-between items-center">
+                          <p className="font-bold text-white text-base">{result.amin}</p>
+                          <div className="text-right">
+                            <span className="text-gray-400 text-[10px] uppercase tracking-wider block mb-0.5">{t('request_survey_time')}</span>
+                            <p className="font-medium text-gray-200 text-sm">{result.surveyTime || '—'}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="sm:col-span-2 pt-2">
+                        <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider block mb-2">{t('request_remarks')}</span>
+                        <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line bg-black/20 p-4 rounded-xl border border-white/5 italic">"{result.remarks}"</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
@@ -352,6 +406,23 @@ function ContactSection({ t }) {
 
 export default function HomePage() {
   const { t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.scrollTo === 'track-application') {
+      // Small timeout to ensure elements are rendered
+      setTimeout(() => {
+        const el = document.getElementById('track-application');
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          // Clear the state so refreshing doesn't trigger scroll again
+          navigate(location.pathname, { replace: true, state: {} });
+        }
+      }, 100);
+    }
+  }, [location, navigate]);
 
   return (
     <div>

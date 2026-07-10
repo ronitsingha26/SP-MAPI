@@ -179,6 +179,29 @@ class ToolRequestService {
       client.release();
     }
   }
+
+  async trackToolRequest(app_id) {
+    const { rows } = await pool.query(
+      `SELECT tr.app_id, tr.status, tr.created_at, tr.updated_at, tr.admin_remark, c.name AS applicant_name, c.district
+       FROM tool_requests tr
+       JOIN customers c ON tr.customer_id = c.id
+       WHERE tr.app_id = ? LIMIT 1`,
+      [app_id]
+    );
+    if (!rows[0]) return null;
+    
+    const app = rows[0];
+    return {
+      app_id: app.app_id,
+      service_type: 'Tool Order',
+      status: app.status,
+      applicant_name: app.applicant_name,
+      district: app.district,
+      created_at: app.created_at,
+      updated_at: app.updated_at,
+      admin_remark: app.admin_remark
+    };
+  }
 }
 
 module.exports = new ToolRequestService();

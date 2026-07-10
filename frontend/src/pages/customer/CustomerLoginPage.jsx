@@ -103,9 +103,15 @@ export default function CustomerLoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-brand-text-muted mt-8">
-            Don't have an account? <br className="sm:hidden" />
-            <Link to="/register" className="text-brand-green font-semibold hover:underline">Register as a Customer</Link>
+          <p className="text-center text-sm text-brand-text-muted mt-8 flex flex-col gap-2">
+            <span>
+              Don't have an account?{' '}
+              <Link to="/register" className="text-brand-green font-semibold hover:underline">Register as Customer</Link>
+            </span>
+            <span>
+              Want to join our team?{' '}
+              <Link to="/apply-amin" className="text-brand-green font-semibold hover:underline">Apply as Amin</Link>
+            </span>
           </p>
         </div>
       </div>

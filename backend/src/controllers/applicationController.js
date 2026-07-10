@@ -125,11 +125,27 @@ exports.updateApplication = async (req, res, next) => {
 
 exports.trackApplication = async (req, res, next) => {
   try {
-    const application = await applicationService.trackApplication(req.params.app_id);
-    // Also get timeline
-    if (application) {
-      application.timeline = await activityLogService.getTimeline(application.id);
+    const appId = req.params.app_id;
+    let application;
+
+    if (appId.startsWith('AMIN-')) {
+      const aminRecruitmentService = require('../services/aminRecruitmentService');
+      application = await aminRecruitmentService.trackAminApplication(appId);
+    } else if (appId.startsWith('TOOLS-')) {
+      const toolRequestService = require('../services/toolRequestService');
+      application = await toolRequestService.trackToolRequest(appId);
+    } else {
+      application = await applicationService.trackApplication(appId);
+      // Also get timeline for standard applications
+      if (application) {
+        application.timeline = await activityLogService.getTimeline(application.id);
+      }
     }
+
+    if (!application) {
+      return res.status(404).json({ success: false, message: 'Application not found. Please check the Application ID.' });
+    }
+
     res.json({ success: true, application });
   } catch (err) {
     next(err);

@@ -25,6 +25,10 @@ router.get('/amins',                           adminCtrl.getAmins);
 router.post('/amins',                          adminCtrl.createAmin);
 router.put('/amins/:id',                       adminCtrl.updateAmin);
 router.delete('/amins/:id',                    adminCtrl.deleteAmin);
+
+router.get('/amin-applications',               adminCtrl.getAminApplications);
+router.put('/amin-applications/:id/status',    adminCtrl.reviewAminApplication);
+router.delete('/amin-applications/:id',        adminCtrl.deleteAminApplication);
 router.get('/payments',                        adminCtrl.getPayments);
 router.get('/enquiries',                       adminCtrl.getEnquiries);
 router.get('/export/:type',                    adminCtrl.exportData);

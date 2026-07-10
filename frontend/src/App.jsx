@@ -21,6 +21,8 @@ const CustomerLoginPage = lazy(() => import('./pages/customer/CustomerLoginPage'
 const CustomerRegisterPage = lazy(() => import('./pages/customer/CustomerRegisterPage'));
 const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage'));
 const AminLoginPage = lazy(() => import('./pages/amin/AminLoginPage'));
+const AminApplicationPage = lazy(() => import('./pages/public/AminApplicationPage'));
+const AminApplicationSuccessPage = lazy(() => import('./pages/public/AminApplicationSuccessPage'));
 
 // ── Lazy-loaded Customer Pages ──
 const CustomerDashboard = lazy(() => import('./pages/customer/CustomerDashboard'));
@@ -133,6 +135,8 @@ export default function App() {
           {/* ── Auth Routes (Login / Register) ── */}
           <Route path="/login" element={<AuthRoute><CustomerLoginPage /></AuthRoute>} />
           <Route path="/register" element={<AuthRoute><CustomerRegisterPage /></AuthRoute>} />
+          <Route path="/apply-amin" element={<AuthRoute><AminApplicationPage /></AuthRoute>} />
+          <Route path="/apply-amin/success" element={<AminApplicationSuccessPage />} />
           <Route path="/admin/login" element={<AuthRoute><AdminLoginPage /></AuthRoute>} />
           <Route path="/amin/login" element={<AuthRoute><AminLoginPage /></AuthRoute>} />
           <Route path="/superadmin/login" element={<Navigate to="/admin/login" replace />} />

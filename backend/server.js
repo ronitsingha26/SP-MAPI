@@ -13,6 +13,9 @@ require('./src/config/db');
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
+// ── Reverse Proxy Configuration ───────────────────────────────
+app.set('trust proxy', 1);
+
 // ── Security Middleware ───────────────────────────────────────
 app.use(helmet());
 app.use(cors({
@@ -37,6 +40,14 @@ const apiLimiter = rateLimit({
   skip: () => isDev, // Skip rate limiting in development
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // We try to separate by token if available (for NAT shared IPs), otherwise fallback to real IP
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.split(' ')[1];
+    }
+    return req.ip;
+  },
   message: { success: false, message: 'Too many requests. Please try again in 15 minutes.' }
 });
 
@@ -44,6 +55,12 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
   skip: () => isDev, // Skip rate limiting in development
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Only count failed logins
+  keyGenerator: (req) => {
+    return req.ip; // Real client IP (thanks to trust proxy)
+  },
   message: { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' }
 });
 
@@ -63,6 +80,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const uploadDir = path.join(__dirname, process.env.UPLOAD_PATH || 'uploads');
 app.use('/uploads', express.static(uploadDir));
 app.use('/api/uploads', express.static(uploadDir));
+
+// Serve subdirectories directly to support Amin applications that omit the folder path
+['aadhaar', 'land_documents', 'field_reports', 'maps', 'misc'].forEach(dir => {
+  const subDir = path.join(uploadDir, dir);
+  app.use('/uploads', express.static(subDir));
+  app.use('/api/uploads', express.static(subDir));
+});
+
+app.use('/api/public/amin-recruitment', require('./src/routes/aminRecruitment.routes'));
 
 // ── API Routes ────────────────────────────────────────────────
 app.use('/api/auth',         require('./src/routes/auth.routes'));

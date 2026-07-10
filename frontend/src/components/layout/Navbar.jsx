@@ -149,9 +149,23 @@ export default function Navbar() {
               )}
             </div>
 
-            <a href="/#track-application" className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-brand-text-muted hover:bg-brand-green-pale hover:text-brand-green">
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                if (location.pathname === '/') {
+                  const el = document.getElementById('track-application');
+                  if (el) {
+                    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                  }
+                } else {
+                  navigate('/', { state: { scrollTo: 'track-application' } });
+                }
+              }}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 text-brand-text-muted hover:bg-brand-green-pale hover:text-brand-green"
+            >
               Track Application
-            </a>
+            </button>
 
             <Link to="/contact" className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive('/contact') ? 'bg-brand-green-pale text-brand-green font-semibold' : 'text-brand-text-muted hover:bg-brand-green-pale hover:text-brand-green'}`}>
               {t('nav_contact')}
