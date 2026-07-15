@@ -66,6 +66,11 @@ export default function AminLoginPage() {
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <><Compass className="w-4 h-4" /> Sign In as Amin</>}
             </button>
           </form>
+
+          <p className="text-center text-sm text-brand-text-muted mt-6 border-t border-gray-100 pt-4">
+            Want to join our team?{' '}
+            <Link to="/apply-amin" className="text-yellow-600 font-semibold hover:underline">Apply as Amin</Link>
+          </p>
         </div>
       </div>
     </div>

@@ -259,6 +259,10 @@ export default function CustomerRegisterPage() {
             Already have an account?{' '}
             <Link to="/login" className="text-brand-green font-semibold hover:underline">Login here</Link>
           </p>
+          <p className="text-center text-sm text-brand-text-muted mt-2">
+            Want to join our team?{' '}
+            <Link to="/apply-amin" className="text-brand-green font-semibold hover:underline">Apply as Amin</Link>
+          </p>
         </div>
       </div>
 
