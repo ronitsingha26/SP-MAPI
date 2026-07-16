@@ -4,15 +4,21 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 15000,
-  headers: { 'Content-Type': 'application/json' },
+  timeout: 30000,
 });
 
-// ── Attach JWT token to every request ────────────────────────
+// ── Attach JWT token and fix Content-Type per request ────────
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('spmapi_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Let axios auto-set Content-Type for FormData (multipart/form-data with boundary)
+  // Only set application/json for non-FormData requests
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  } else {
+    config.headers['Content-Type'] = 'application/json';
   }
   return config;
 });

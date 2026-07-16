@@ -20,11 +20,15 @@ class ApplicationService {
       const file = Array.isArray(fileArr) ? fileArr[0] : fileArr;
       if (!file) continue;
       
-      let docType = 'land_document';
+      let docType = 'other';
       if (fieldname.includes('aadhaar_front')) docType = 'aadhaar_front';
       else if (fieldname.includes('aadhaar_back')) docType = 'aadhaar_back';
       else if (fieldname.includes('vanshawali')) docType = 'vanshawali';
       else if (fieldname.includes('khatiyan')) docType = 'khatiyan';
+      else if (fieldname.includes('kewala')) docType = 'kewala';
+      else if (fieldname.includes('original_deed')) docType = 'original_deed';
+      else if (fieldname.includes('land')) docType = 'land_document';
+      else if (fieldname.includes('other')) docType = 'other';
       
       const fileUrl = `/uploads/${path.relative(process.env.UPLOAD_PATH || './uploads', file.path).replace(/\\/g, '/')}`;
       const docId = uuidv4();
