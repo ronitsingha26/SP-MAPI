@@ -22,8 +22,10 @@ export default function AdminDocumentsPage() {
       // Collect documents from applications (flatten)
       const allDocs = [];
       for (const app of apps) {
-        if (app.documents && Array.isArray(app.documents)) {
-          app.documents.forEach(d => {
+        let docs = app.documents;
+        if (typeof docs === 'string') { try { docs = JSON.parse(docs); } catch(e) { docs = []; } }
+        if (docs && Array.isArray(docs)) {
+          docs.forEach(d => {
             allDocs.push({
               ...d,
               applicant_name: app.applicant_name,

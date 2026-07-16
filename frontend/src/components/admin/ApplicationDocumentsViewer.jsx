@@ -2,8 +2,20 @@ import { FileText, ExternalLink } from 'lucide-react';
 import { getFileUrl } from '../../utils/api';
 
 export default function ApplicationDocumentsViewer({ documents = [] }) {
+  let parsedDocs = documents;
+  if (typeof documents === 'string') {
+    try {
+      parsedDocs = JSON.parse(documents);
+    } catch (e) {
+      parsedDocs = [];
+    }
+  }
+  if (!Array.isArray(parsedDocs)) {
+    parsedDocs = [];
+  }
+
   // Filter for customer documents (exclude amin field reports)
-  const customerDocs = documents.filter(doc => doc.doc_type !== 'field_report' && doc.uploaded_by !== 'amin');
+  const customerDocs = parsedDocs.filter(doc => doc.doc_type !== 'field_report' && doc.uploaded_by !== 'amin');
 
   if (customerDocs.length === 0) {
     return (

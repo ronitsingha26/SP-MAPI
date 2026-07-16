@@ -199,7 +199,7 @@ export default function AdminBantwaraPage() {
                             <AminReportsViewer documents={app.documents || []} />
                           </div>
                           <ApplicationDocumentsViewer documents={app.documents || []} />
-                          {!app.amin_name && (
+                          {!app.amin_name && !['assigned','in_progress','completed'].includes(app.status) && (
                             <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
                               <button
                                 onClick={() => setAssigningAppId(app.id)}

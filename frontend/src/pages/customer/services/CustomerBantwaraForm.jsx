@@ -99,7 +99,7 @@ export default function CustomerBantwaraForm() {
       formData.append('khatiyan', form.khatiyan);
       if (form.vanshawali) formData.append('vanshawali', form.vanshawali);
 
-      const res = await api.post('/applications/bantwara', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const res = await api.post('/applications/bantwara', formData);
       setSuccessId(res.data.app_id);
       setTimeout(() => navigate('/customer/applications'), 2500);
     } catch (err) {

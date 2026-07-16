@@ -104,9 +104,7 @@ export default function ProvideMapPage() {
       formData.append('aadhaar_front', form.aadhaarFront);
       formData.append('aadhaar_back', form.aadhaarBack);
 
-      const res = await api.post('/applications/map', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/applications/map', formData);
 
       setSuccessId(res.data.app_id);
       setTimeout(() => navigate('/customer/dashboard'), 2500);

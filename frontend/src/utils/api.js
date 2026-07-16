@@ -17,9 +17,32 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ── Handle 401 globally — clear session ──────────────────────
+// ── Handle 401 globally and Auto-Parse JSON fields ──────────────────────
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const jsonFields = ['documents', 'co_owners', 'status_history', 'photos', 'tools', 'old_value', 'new_value', 'images'];
+    const parseJsonFields = (obj) => {
+      if (Array.isArray(obj)) {
+        obj.forEach(parseJsonFields);
+      } else if (obj !== null && typeof obj === 'object') {
+        Object.keys(obj).forEach(key => {
+          if (jsonFields.includes(key) && typeof obj[key] === 'string') {
+            try {
+              obj[key] = JSON.parse(obj[key]);
+            } catch(e) {
+              // ignore parse errors, keep as string
+            }
+          } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+            parseJsonFields(obj[key]);
+          }
+        });
+      }
+    };
+    if (response.data) {
+      parseJsonFields(response.data);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       // Determine which login page to redirect to based on stored user role
@@ -59,7 +82,8 @@ export const removeToken = () => {
 export const getFileUrl = (filePath) => {
   if (!filePath) return '';
   if (filePath.startsWith('http')) return filePath;
-  const base = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+  // Use API_BASE but also try without /api suffix for direct file access
+  const base = API_BASE.replace(/\/api\/?$/, '');
   const path = filePath.startsWith('/') ? filePath : `/${filePath}`;
   return `${base}${path}`;
 };

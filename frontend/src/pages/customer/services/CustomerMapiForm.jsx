@@ -123,9 +123,7 @@ export default function CustomerMapiForm() {
       formData.append('aadhaar_back', form.aadhaarBack);
       formData.append('land_document', form.landDocument);
 
-      const res = await api.post('/applications/mapi', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/applications/mapi', formData);
       setSuccessId(res.data.app_id);
       setTimeout(() => navigate('/customer/applications'), 2500);
     } catch (err) {

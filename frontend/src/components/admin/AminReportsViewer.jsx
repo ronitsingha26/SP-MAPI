@@ -5,8 +5,15 @@ import { getFileUrl } from '../../utils/api';
 export default function AminReportsViewer({ documents = [] }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Parse documents if string (MariaDB returns JSON as string)
+  let parsedDocs = documents;
+  if (typeof documents === 'string') {
+    try { parsedDocs = JSON.parse(documents); } catch (e) { parsedDocs = []; }
+  }
+  if (!Array.isArray(parsedDocs)) parsedDocs = [];
+
   // Filter for field reports and sort by newest first
-  const reports = documents
+  const reports = parsedDocs
     .filter(doc => doc.doc_type === 'field_report')
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 

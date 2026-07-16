@@ -215,9 +215,7 @@ export default function BantwaraRegistrationPage() {
       formData.append('khatiyan', form.khatiyan);
       if (form.vanshawali) formData.append('vanshawali', form.vanshawali);
 
-      const res = await api.post('/applications/bantwara', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/applications/bantwara', formData);
       
       setSuccessData({ appId: res.data.app_id, mobile: form.mobile, email: form.email, password: form.password });
     } catch (err) { 

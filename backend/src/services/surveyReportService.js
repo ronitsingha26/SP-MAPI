@@ -56,9 +56,9 @@ class SurveyReportService {
     if (status === 'approved') {
       await pool.query(
         `UPDATE applications SET status = 'completed', completed_at = NOW(), completion_date = NOW(),
-                field_report_url = ?, last_edited_by = ?, last_edited_at = NOW()
+                field_report_url = ?
          WHERE id = ?`,
-        [report.final_report_url, admin_id, report.application_id]
+        [report.final_report_url, report.application_id]
       );
 
       await activityLogService.log({

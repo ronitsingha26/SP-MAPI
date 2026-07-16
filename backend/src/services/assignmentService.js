@@ -23,9 +23,9 @@ class AssignmentService {
       // Update application status to 'assigned'
       await client.query(
         `UPDATE applications SET status = 'assigned', assigned_amin_id = ?, amin_assigned_at = NOW(),
-                visit_date = ?, visit_time = ?, last_edited_by = ?, last_edited_at = NOW()
+                survey_scheduled_date = ?, visit_time = ?
          WHERE id = ?`,
-        [amin_id, survey_date || null, survey_time || null, assigned_by, application_id]
+        [amin_id, survey_date || null, survey_time || null, application_id]
       );
 
       // Increment amin's active tasks

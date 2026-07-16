@@ -50,9 +50,7 @@ export default function AminTasksPage() {
     try {
       const formData = new FormData();
       formData.append('report', reportFile);
-      await api.post(`/amin/tasks/${taskId}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post(`/amin/tasks/${taskId}/upload`, formData);
       alert('Report uploaded successfully!');
       setTasks(tasks.map(t => t.id === taskId ? { ...t, report_url: 'uploaded' } : t));
       fetchTasks();

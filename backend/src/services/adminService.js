@@ -100,6 +100,12 @@ class AdminService {
     const amin = await adminRepository.getAminById(aminId);
     if (!amin) throw new AppError('Amin not found or inactive.', 404);
 
+    // Check if application already has an amin assigned
+    const app = await adminRepository.getApplicationById(applicationId);
+    if (app && app.assigned_amin_id) {
+      throw new AppError('An Amin is already assigned to this application.', 409);
+    }
+
     await adminRepository.assignAmin(applicationId, aminId);
 
     // Notify the Amin

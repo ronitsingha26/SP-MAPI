@@ -101,9 +101,7 @@ export default function AminApplicationPage() {
         if (files[key]) data.append(key, files[key]);
       });
 
-      const res = await api.post('/public/amin-recruitment/apply', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.post('/public/amin-recruitment/apply', data);
 
       navigate('/apply-amin/success', { state: { appId: res.data.app_id, formData } });
     } catch (err) {
