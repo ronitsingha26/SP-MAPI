@@ -88,6 +88,33 @@ exports.createAmin = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+exports.onboardAmin = async (req, res, next) => {
+  try {
+    const files = req.files || {};
+    const bcrypt = require('bcryptjs');
+    const aminRecruitmentService = require('../services/aminRecruitmentService');
+
+    let password_hash = null;
+    if (req.body.password) {
+      password_hash = await bcrypt.hash(req.body.password, 10);
+    }
+    
+    const payload = { ...req.body, password_hash };
+
+    // 1. Submit the application to create the application record (and upload files)
+    const result = await aminRecruitmentService.submitApplication(payload, files);
+    
+    // 2. Immediately approve it to generate the Amin account
+    await aminRecruitmentService.reviewApplication(result.id, 'approved', 'Auto-approved via Admin Onboarding Panel');
+
+    res.status(201).json({
+      success: true,
+      message: 'Amin onboarded successfully.',
+      app_id: result.app_id
+    });
+  } catch (err) { next(err); }
+};
+
 exports.updateAmin = async (req, res, next) => {
   try {
     await adminService.updateAmin(req.params.id, req.body);

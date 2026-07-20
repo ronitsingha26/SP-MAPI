@@ -54,9 +54,9 @@ export default function CustomerMapiForm() {
     villageId: '', villageName: currentUser?.village || '',
     policeStation: currentUser?.police_station || '',
     wardName: currentUser?.ward_number || '',
-    moujaName: currentUser?.mouza || '',
-    khataNumber: '', pincode: currentUser?.pincode || '', landArea: '',
-    plotNumber: '', purpose: '',
+    moujaName: currentUser?.mouja || '',
+    khesraNumber: '', pincode: currentUser?.pincode || '', landArea: '',
+    noOfDays: '', plotNumber: '', purpose: '',
     aadhaarFront: null, aadhaarBack: null, landDocument: null,
   });
 
@@ -87,7 +87,7 @@ export default function CustomerMapiForm() {
   }, [form.state, statesList]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const estimatedPrice = form.landArea ? (Number(form.landArea) * 3).toLocaleString() : '0';
+  const estimatedPrice = form.noOfDays ? (Number(form.noOfDays) * 2500).toLocaleString() : '0';
 
   const validateStep1 = () => {
     if (!form.districtName) return 'Please select a district';
@@ -115,7 +115,8 @@ export default function CustomerMapiForm() {
       if (form.villageName) formData.append('village', form.villageName);
       if (form.wardName) formData.append('ward_name', form.wardName);
       if (form.moujaName) formData.append('mouja_name', form.moujaName);
-      if (form.khataNumber) formData.append('khata_number', form.khataNumber);
+      if (form.khesraNumber) formData.append('khasra_number', form.khesraNumber);
+      if (form.noOfDays) formData.append('no_of_days', form.noOfDays);
       if (form.blockName) formData.append('block_name', form.blockName);
       if (form.pincode) formData.append('pincode', form.pincode);
       if (form.landArea) formData.append('land_area', form.landArea);
@@ -219,20 +220,23 @@ export default function CustomerMapiForm() {
               <FormField label="Mouja Name / Number">
                 <input className="input" placeholder="Mouja name or number" value={form.moujaName} onChange={e => set('moujaName', e.target.value)} />
               </FormField>
-              <FormField label="Khata Number">
-                <input className="input" placeholder="Khata number" value={form.khataNumber} onChange={e => set('khataNumber', e.target.value)} />
+              <FormField label="Khesra Number">
+                <input className="input" placeholder="Khesra number" value={form.khesraNumber} onChange={e => set('khesraNumber', e.target.value)} />
               </FormField>
               <FormField label="Pincode" required>
                 <input className="input" placeholder="6-digit pincode" maxLength={6} value={form.pincode} onChange={e => set('pincode', e.target.value.replace(/\D/g, ''))} />
               </FormField>
-              <FormField label="Total Land Area (sq. ft.)" required>
-                <input className="input" type="number" min="0" placeholder="Enter land area" value={form.landArea} onChange={e => set('landArea', e.target.value)} />
+              <FormField label="Total Land Area (sq. ft.)">
+                <input className="input" type="number" min="0" placeholder="Enter land area (optional)" value={form.landArea} onChange={e => set('landArea', e.target.value)} />
               </FormField>
-              {form.landArea && (
+              <FormField label="Number of Days for Amin" required>
+                <input className="input" type="number" min="1" placeholder="Enter number of days" value={form.noOfDays} onChange={e => set('noOfDays', e.target.value)} />
+              </FormField>
+              {form.noOfDays && (
                 <div className="sm:col-span-2 bg-brand-green-pale rounded-xl p-4">
                   <p className="text-sm text-brand-text-muted">Estimated Cost</p>
                   <p className="text-2xl font-bold text-brand-green">₹{estimatedPrice}</p>
-                  <p className="text-xs text-brand-text-muted">@ ₹3 per sq. ft.</p>
+                  <p className="text-xs text-brand-text-muted">@ ₹2,500 per day</p>
                 </div>
               )}
             </div>

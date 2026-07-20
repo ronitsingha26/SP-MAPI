@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Building2, Wrench, Info, Phone, LogIn,
   Menu, X, ChevronDown, MapPin, Globe, User, LogOut,
-  ClipboardList, GitBranch, Map, ClipboardCheck
+  ClipboardList, GitBranch, Map, ClipboardCheck, UserPlus
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -61,6 +61,7 @@ export default function Navbar() {
     { label: 'Apply for Batwara', service: 'bantwara', icon: GitBranch },
     { label: 'Apply for Map', service: 'map', icon: Map },
     { label: 'Apply for Amin Tools', service: 'tools', icon: Wrench },
+    { label: 'Apply as Amin', service: null, icon: UserPlus, directTo: '/apply-amin' },
   ];
   const languageLabel = language === 'en' ? 'English' : language === 'hi' ? 'हिन्दी' : 'English + हिन्दी';
 
@@ -125,10 +126,10 @@ export default function Navbar() {
                     </Link>
                     {servicesDropdown.map((item) => {
                       const Icon = item.icon;
-                      const to = getServiceLink(item.service);
+                      const to = item.directTo || getServiceLink(item.service);
                       return (
                         <Link
-                          key={item.service}
+                          key={item.label}
                           to={to}
                           onClick={() => setDropdownOpen(false)}
                           className={`flex items-start gap-3 p-3 rounded-xl hover:bg-brand-green-pale transition-colors group`}
@@ -256,8 +257,9 @@ export default function Navbar() {
               <p className="px-4 py-1 text-xs font-bold text-brand-text-muted uppercase tracking-wider">Services</p>
               {servicesDropdown.map(item => {
                 const Icon = item.icon;
+                const to = item.directTo || getServiceLink(item.service);
                 return (
-                  <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 ml-2 border-l-2 border-brand-green-pale rounded-r-xl text-sm font-medium text-brand-text hover:bg-brand-green-pale hover:border-brand-green">
+                  <Link key={item.label} to={to} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 ml-2 border-l-2 border-brand-green-pale rounded-r-xl text-sm font-medium text-brand-text hover:bg-brand-green-pale hover:border-brand-green">
                     <Icon className="w-4 h-4 text-brand-green" /> {item.label}
                   </Link>
                 );

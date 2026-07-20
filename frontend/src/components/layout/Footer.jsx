@@ -88,9 +88,18 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-brand-green-pale bg-brand-green-pale/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="text-xs text-brand-text-muted">
-            {t('footer_copyright')}
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+            <p className="text-xs text-brand-text-muted">
+              {t('footer_copyright')}
+            </p>
+            <span className="hidden sm:inline text-brand-text-muted text-xs">|</span>
+            <p className="text-xs text-brand-text-muted">
+              Designed and developed by{' '}
+              <a href="https://bnintelhub.com/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-green transition-colors font-medium">
+                BN INTELHUB PVT LTD
+              </a>
+            </p>
+          </div>
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="text-xs text-brand-text-muted hover:text-brand-green transition-colors">{t('footer_privacy')}</Link>
             <Link to="/terms" className="text-xs text-brand-text-muted hover:text-brand-green transition-colors">{t('footer_terms')}</Link>

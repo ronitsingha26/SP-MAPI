@@ -135,7 +135,8 @@ CREATE TABLE IF NOT EXISTS admins (
   updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   deleted_at    DATETIME NULL,
   UNIQUE INDEX idx_admins_email (email),
-  INDEX idx_admins_status (status)
+  INDEX idx_admins_status (status),
+  FOREIGN KEY (created_by) REFERENCES admins(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS admin_districts (
@@ -165,7 +166,7 @@ CREATE TABLE IF NOT EXISTS customers (
   village              VARCHAR(100) NULL,
   ward_number          VARCHAR(20)  NULL,
   panchayat            VARCHAR(100) NULL,
-  mouza                VARCHAR(100) NULL,
+  mouja                VARCHAR(100) NULL,
   police_station       VARCHAR(100) NULL,
   pincode              VARCHAR(10)  NULL,
   address              TEXT NULL,
@@ -245,7 +246,7 @@ CREATE TABLE IF NOT EXISTS applications (
   panchayat         VARCHAR(150) NULL,
   village           VARCHAR(150) NULL,
   ward_name         VARCHAR(100) NULL,
-  mouza_name        VARCHAR(100) NULL,
+  mouja_name        VARCHAR(100) NULL,
   police_station    VARCHAR(150) NULL,
   pincode           VARCHAR(10) NULL,
   -- Service-specific fields
@@ -264,7 +265,14 @@ CREATE TABLE IF NOT EXISTS applications (
   co_owners         JSON NULL,
   court_case_number VARCHAR(100) NULL,
   vanshawali_details TEXT NULL,
-  map_purpose       VARCHAR(200) NULL,
+  map_purpose       VARCHAR(50) NULL,
+  no_of_days        INT NULL,
+  area_type         VARCHAR(50) NULL,
+  map_type          VARCHAR(50) NULL,
+  thana_municipal   VARCHAR(100) NULL,
+  mouja_ward        VARCHAR(100) NULL,
+  no_of_sheets      INT NULL,
+  
   -- Status & lifecycle
   status            ENUM('draft','pending','under_review','approved','assigned','in_progress','completed','delivered','rejected','cancelled','withdrawn') NOT NULL DEFAULT 'pending',
   status_history    JSON NOT NULL,
@@ -277,7 +285,7 @@ CREATE TABLE IF NOT EXISTS applications (
   withdrawn_by      VARCHAR(36) NULL,
   withdraw_reason   TEXT NULL,
   -- Survey
-  survey_scheduled_date DATE NULL,
+  visit_date DATE NULL,
   visit_time        TIME NULL,
   -- Completion
   field_report_url  VARCHAR(500) NULL,
@@ -482,9 +490,9 @@ CREATE TABLE IF NOT EXISTS invoices (
   status ENUM('unpaid', 'paid', 'cancelled') DEFAULT 'unpaid',
   issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   paid_at TIMESTAMP NULL,
-  FOREIGN KEY (application_id) REFERENCES applications(id),
-  FOREIGN KEY (payment_id) REFERENCES payments(id),
-  FOREIGN KEY (customer_id) REFERENCES customers(id)
+  FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
+  FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL,
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
 -- ============================================================

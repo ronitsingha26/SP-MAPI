@@ -3,6 +3,7 @@ import { Plus, X, RefreshCw, Search, Filter, Eye, CheckCircle, XCircle, Trash2 }
 import { statusColor, statusLabel } from '../../utils/helpers';
 import api from '../../utils/api';
 import ApplicationDocumentsViewer from '../../components/admin/ApplicationDocumentsViewer';
+import AdminAminOnboardModal from '../../components/admin/AdminAminOnboardModal';
 
 export default function AdminAminsPage() {
   const [activeTab, setActiveTab] = useState('amins'); // 'amins' | 'applications'
@@ -21,13 +22,10 @@ export default function AdminAminsPage() {
   
   // Modals
   const [showModal, setShowModal] = useState(false);
-  const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: '', mobile: '', email: '', password: '', district: '', license_number: '' });
-  
   const [viewApp, setViewApp] = useState(null);
-  const [deleteAppModal, setDeleteAppModal] = useState(null);
   const [adminRemark, setAdminRemark] = useState('');
   const [processingApp, setProcessingApp] = useState(false);
+  const [deleteAppModal, setDeleteAppModal] = useState(null);
 
   const fetchAmins = async () => {
     setLoadingAmins(true);
@@ -62,29 +60,14 @@ export default function AdminAminsPage() {
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') {
-        if (showModal && !adding) setShowModal(false);
+        if (showModal) setShowModal(false);
         if (viewApp && !processingApp) setViewApp(null);
         if (deleteAppModal) setDeleteAppModal(null);
       }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [showModal, adding, viewApp, processingApp]);
-
-  const handleAddAmin = async (e) => {
-    e.preventDefault();
-    setAdding(true);
-    try {
-      await api.post('/admin/amins', form);
-      setShowModal(false);
-      setForm({ name: '', mobile: '', email: '', password: '', district: '', license_number: '' });
-      fetchAmins();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to add Amin');
-    } finally {
-      setAdding(false);
-    }
-  };
+  }, [showModal, viewApp, processingApp, deleteAppModal]);
 
   const toggleStatus = async (amin) => {
     const newStatus = amin.status === 'active' ? 'inactive' : 'active';
@@ -121,18 +104,11 @@ export default function AdminAminsPage() {
       // Update local list
       setApplications(applications.map(app => app.id === viewApp.id ? updatedApp : app));
 
-      // If approved, trigger Amin Creation workflow
+      // If approved, backend automatically creates the Amin account. 
+      // We just need to close the modal and refresh the list.
       if (status === 'approved') {
         setViewApp(null);
-        setForm({
-          name: viewApp.name,
-          mobile: viewApp.mobile,
-          email: viewApp.email,
-          district: viewApp.district,
-          password: '', // Needs to be generated or manually input
-          license_number: ''
-        });
-        setShowModal(true);
+        fetchAmins(); // Refresh amins list to show newly created amin
       }
     } catch (err) {
       alert(err.response?.data?.message || `Failed to ${status} application.`);
@@ -422,43 +398,40 @@ export default function AdminAminsPage() {
               )}
 
               {/* Approval Actions */}
-              {(viewApp.status === 'pending' || (viewApp.status === 'approved' && !viewApp.is_amin_created)) && (
+              {/* Approval Actions */}
+              {viewApp.status === 'pending' && (
                 <div className="bg-white p-4 rounded-xl border border-brand-green-pale shadow-sm mt-4">
                   <h3 className="text-sm font-bold text-brand-text mb-3">
-                    {viewApp.status === 'pending' ? 'Review Decision' : 'Complete Amin Account Creation'}
+                    Review Decision
                   </h3>
-                  {viewApp.status === 'pending' && (
-                    <textarea 
-                      placeholder="Add remarks (optional)..." 
-                      className="input min-h-[80px] mb-4"
-                      value={adminRemark}
-                      onChange={(e) => setAdminRemark(e.target.value)}
-                    />
-                  )}
+                  <textarea 
+                    placeholder="Add remarks (optional)..." 
+                    className="input min-h-[80px] mb-4"
+                    value={adminRemark}
+                    onChange={(e) => setAdminRemark(e.target.value)}
+                  />
                   <div className="flex gap-3">
-                    {viewApp.status === 'pending' && (
-                      <button 
-                        onClick={() => handleReviewApplication('rejected')}
-                        disabled={processingApp}
-                        className="flex-1 py-2 rounded-xl font-bold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-                      >
-                        <XCircle className="w-4 h-4" /> Reject
-                      </button>
-                    )}
+                    <button 
+                      onClick={() => handleReviewApplication('rejected')}
+                      disabled={processingApp}
+                      className="flex-1 py-2 rounded-xl font-bold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      <XCircle className="w-4 h-4" /> Reject
+                    </button>
                     <button 
                       onClick={() => handleReviewApplication('approved')}
                       disabled={processingApp}
                       className="flex-1 py-2 rounded-xl font-bold bg-brand-green text-white hover:bg-green-600 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
                     >
                       <CheckCircle className="w-4 h-4" /> 
-                      {viewApp.status === 'pending' ? 'Approve & Create Amin' : 'Create Amin Account'}
+                      Approve & Create Amin
                     </button>
                   </div>
                 </div>
               )}
 
               {/* Amin Created Badge */}
-              {viewApp.status === 'approved' && viewApp.is_amin_created == 1 && (
+              {viewApp.status === 'approved' && (
                 <div className="bg-brand-green-pale/50 p-4 rounded-xl border border-brand-green/20 mt-4 text-center">
                   <CheckCircle className="w-6 h-6 text-brand-green mx-auto mb-2" />
                   <p className="text-brand-green font-bold">Amin account already created.</p>
@@ -517,56 +490,14 @@ export default function AdminAminsPage() {
 
       {/* Add Amin Modal */}
       {showModal && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => {
-            if (!adding) setShowModal(false);
+        <AdminAminOnboardModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false);
+            fetchAmins();
+            fetchApplications();
           }}
-        >
-          <div 
-            className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-fade-in shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center p-5 border-b border-gray-100">
-              <h2 className="font-bold text-brand-text text-lg">Add New Amin</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-red-500">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <form onSubmit={handleAddAmin} className="p-5 space-y-4">
-              <div>
-                <label className="label">Full Name *</label>
-                <input className="input" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
-              </div>
-              <div>
-                <label className="label">Mobile Number *</label>
-                <input className="input" required maxLength={10} value={form.mobile} onChange={e => setForm({...form, mobile: e.target.value})} />
-              </div>
-              <div>
-                <label className="label">Email *</label>
-                <input className="input" type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-              </div>
-              <div>
-                <label className="label">Password *</label>
-                <input className="input" required type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
-              </div>
-              <div>
-                <label className="label">District *</label>
-                <input className="input" required placeholder="E.g. Patna" value={form.district} onChange={e => setForm({...form, district: e.target.value})} />
-              </div>
-              <div>
-                <label className="label">License Number</label>
-                <input className="input" value={form.license_number} onChange={e => setForm({...form, license_number: e.target.value})} />
-              </div>
-              <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-outline flex-1 justify-center">Cancel</button>
-                <button type="submit" disabled={adding} className="btn-primary flex-1 justify-center disabled:opacity-60">
-                  {adding ? 'Adding...' : 'Save Amin'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        />
       )}
     </div>
   );

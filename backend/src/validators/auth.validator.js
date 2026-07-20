@@ -27,7 +27,7 @@ const adminLoginValidator = [
 ];
 
 const aminLoginValidator = [
-  body('mobile').trim().notEmpty().withMessage('Mobile number is required').matches(/^[0-9]{10}$/).withMessage('Valid 10-digit mobile number is required'),
+  body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Valid email is required'),
   body('password').notEmpty().withMessage('Password is required'),
 ];
 

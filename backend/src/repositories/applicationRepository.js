@@ -12,21 +12,24 @@ class ApplicationRepository {
       father_name, state, district, district_id, panchayat, police_station, village,
       ward_name, mouja_name, khata_number, block_name, block_id, pincode, land_area, payment_required,
       co_owners = null, court_case_number = null, vanshawali_details = null,
-      khasra_number = null, map_purpose = null
+      khasra_number = null, map_purpose = null, no_of_days = null,
+      area_type = null, map_type = null, thana_municipal = null, mouja_ward = null, no_of_sheets = null
     } = data;
 
     await client.query(
       `INSERT INTO applications
          (id, app_id, service_type, customer_id, applicant_name, applicant_mobile, applicant_email,
           father_name, state, district, district_id, panchayat, police_station, village,
-          ward_name, mouza_name, khata_number, block_name, block_id, pincode, land_area, payment_required, 
-          co_owners, court_case_number, vanshawali_details, khasra_number, map_purpose, status_history)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          ward_name, mouja_name, khata_number, block_name, block_id, pincode, land_area, payment_required, 
+          co_owners, court_case_number, vanshawali_details, khasra_number, map_purpose, no_of_days,
+          area_type, map_type, thana_municipal, mouja_ward, no_of_sheets, status_history)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         id, app_id, service_type, customer_id || null, applicant_name, applicant_mobile, applicant_email || null,
         father_name || null, state || 'Bihar', district || null, district_id || null, panchayat || null, police_station || null, village || null,
         ward_name || null, mouja_name || null, khata_number || null, block_name || null, block_id || null, pincode || null, land_area || null, payment_required || 0,
-        co_owners ? JSON.stringify(co_owners) : null, court_case_number || null, vanshawali_details || null, khasra_number || null, map_purpose || null,
+        co_owners ? JSON.stringify(co_owners) : null, court_case_number || null, vanshawali_details || null, khasra_number || null, map_purpose || null, no_of_days || null,
+        area_type || null, map_type || null, thana_municipal || null, mouja_ward || null, no_of_sheets || null,
         JSON.stringify([])
       ]
     );
@@ -77,24 +80,36 @@ class ApplicationRepository {
               a.applicant_name, a.applicant_mobile, a.applicant_email,
               a.payment_status, a.payment_required, a.admin_remark,
               a.created_at, a.updated_at,
-              am.name AS amin_name
+              am.name AS amin_name,
+              COALESCE(
+                JSON_ARRAYAGG(
+                  JSON_OBJECT(
+                    'id', d.id, 'doc_type', d.doc_type, 'original_name', d.original_name, 'file_url', d.file_url, 'file_size', d.file_size, 'verification_status', d.verification_status, 'created_at', d.created_at
+                  )
+                ), '[]'
+              ) AS documents
        FROM applications a
        LEFT JOIN amins am ON a.assigned_amin_id = am.id
+       LEFT JOIN documents d ON a.id = d.application_id
        WHERE a.customer_id = ? AND a.deleted_at IS NULL
+       GROUP BY a.id, am.name
        ORDER BY a.created_at DESC`,
       [customer_id]
     );
-    const apps = result.rows;
-    for (const app of apps) {
-      const docResult = await pool.query(
-        `SELECT id, original_name, doc_type, file_url, file_size, verification_status, created_at 
-         FROM documents 
-         WHERE application_id = ?`,
-        [app.id]
-      );
-      app.documents = docResult.rows;
-    }
-    return apps;
+    
+    // MariaDB might return documents as a string or array containing a single null object if no documents exist.
+    // Clean it up similar to how we parse it in the frontend, or just rely on the frontend interceptor.
+    return result.rows.map(row => {
+      let docs = row.documents;
+      if (typeof docs === 'string') {
+        try { docs = JSON.parse(docs); } catch(e) { docs = []; }
+      }
+      if (Array.isArray(docs) && docs.length === 1 && docs[0].id === null) {
+        docs = [];
+      }
+      row.documents = docs || [];
+      return row;
+    });
   }
 
   async getApplicationByCustomerAndId(id, customer_id) {
@@ -108,7 +123,8 @@ class ApplicationRepository {
   async updateApplication(id, data) {
     const {
       panchayat, police_station, village, ward_name, mouja_name,
-      khata_number, block_name, pincode, land_area, khasra_number, map_purpose
+      khata_number, block_name, pincode, land_area, khasra_number, map_purpose, no_of_days,
+      area_type, map_type, thana_municipal, mouja_ward, no_of_sheets
     } = data;
 
     await pool.query(
@@ -117,13 +133,19 @@ class ApplicationRepository {
          police_station = COALESCE(?, police_station),
          village = COALESCE(?, village),
          ward_name = COALESCE(?, ward_name),
-         mouza_name = COALESCE(?, mouza_name),
+         mouja_name = COALESCE(?, mouja_name),
          khata_number = COALESCE(?, khata_number),
          block_name = COALESCE(?, block_name),
          pincode = COALESCE(?, pincode),
          land_area = COALESCE(?, land_area),
          khasra_number = COALESCE(?, khasra_number),
          map_purpose = COALESCE(?, map_purpose),
+         no_of_days = COALESCE(?, no_of_days),
+         area_type = COALESCE(?, area_type),
+         map_type = COALESCE(?, map_type),
+         thana_municipal = COALESCE(?, thana_municipal),
+         mouja_ward = COALESCE(?, mouja_ward),
+         no_of_sheets = COALESCE(?, no_of_sheets),
          updated_at = NOW()
        WHERE id = ? AND deleted_at IS NULL`,
       [
@@ -131,7 +153,8 @@ class ApplicationRepository {
         ward_name || null, mouja_name || null, khata_number || null,
         block_name || null, pincode || null,
         land_area ? parseFloat(land_area) : null,
-        khasra_number || null, map_purpose || null,
+        khasra_number || null, map_purpose || null, no_of_days || null,
+        area_type || null, map_type || null, thana_municipal || null, mouja_ward || null, no_of_sheets || null,
         id
       ]
     );

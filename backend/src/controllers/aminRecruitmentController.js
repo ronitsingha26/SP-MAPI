@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const service = require('../services/aminRecruitmentService');
 const { AppError } = require('../middleware/errorHandler');
 
@@ -26,7 +27,14 @@ exports.apply = async (req, res, next) => {
       }
     }
 
-    const result = await service.submitApplication(req.body, files);
+    let password_hash = null;
+    if (req.body.password) {
+      password_hash = await bcrypt.hash(req.body.password, 10);
+    }
+    
+    const payload = { ...req.body, password_hash };
+
+    const result = await service.submitApplication(payload, files);
     res.status(201).json({
       success: true,
       message: 'Application Submitted Successfully',

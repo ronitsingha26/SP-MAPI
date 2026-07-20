@@ -19,7 +19,7 @@ export default function CustomerRegisterPage() {
   const [form, setForm] = useState({
     name: '', fatherName: '', mobile: '', email: '',
     state: 'Bihar', district: '', block: '', village: '',
-    wardNumber: '', panchayat: '', mouza: '', policeStation: '',
+    wardNumber: '', panchayat: '', mouja: '', policeStation: '',
     pincode: '', address: '',
     password: '', confirmPassword: '',
   });
@@ -73,7 +73,7 @@ export default function CustomerRegisterPage() {
         state: form.state, district: form.district,
         block: form.block, village: form.village,
         wardNumber: form.wardNumber, panchayat: form.panchayat,
-        mouza: form.mouza, policeStation: form.policeStation,
+        mouja: form.mouja, policeStation: form.policeStation,
         pincode: form.pincode, address: form.address,
       });
       navigate('/customer/dashboard');
@@ -187,7 +187,7 @@ export default function CustomerRegisterPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div><label className="label">Panchayat</label><input className="input" placeholder="Panchayat" value={form.panchayat} onChange={set('panchayat')} /></div>
                   <div><label className="label">Ward Number</label><input className="input" placeholder="Ward no." value={form.wardNumber} onChange={set('wardNumber')} /></div>
-                  <div><label className="label">Mouza</label><input className="input" placeholder="Mouza" value={form.mouza} onChange={set('mouza')} /></div>
+                  <div><label className="label">Mouja</label><input className="input" placeholder="Mouja" value={form.mouja} onChange={set('mouja')} /></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div><label className="label">Police Station (Thana)</label><input className="input" placeholder="Thana" value={form.policeStation} onChange={set('policeStation')} /></div>

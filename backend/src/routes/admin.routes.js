@@ -8,6 +8,7 @@ const propCtrl   = require('../controllers/propertyController');
 const bookCtrl   = require('../controllers/bookingController');
 const { protect, authorize } = require('../middleware/auth');
 const { jsonToCsv } = require('../utils/csvExport');
+const upload     = require('../middleware/upload');
 
 // All admin routes require authentication + admin OR superadmin role
 router.use(protect, authorize('admin', 'superadmin'));
@@ -23,6 +24,14 @@ router.get('/customers',                       adminCtrl.getCustomers);
 router.get('/customers/:id/details',           adminCtrl.getCustomerDetails);
 router.get('/amins',                           adminCtrl.getAmins);
 router.post('/amins',                          adminCtrl.createAmin);
+router.post('/amins/onboard',                  upload.fields([
+  { name: 'aadhaar_front', maxCount: 1 },
+  { name: 'aadhaar_back', maxCount: 1 },
+  { name: 'pan', maxCount: 1 },
+  { name: 'educational_certificate', maxCount: 1 },
+  { name: 'experience_certificate', maxCount: 1 },
+  { name: 'passport_photo', maxCount: 1 }
+]), adminCtrl.onboardAmin);
 router.put('/amins/:id',                       adminCtrl.updateAmin);
 router.delete('/amins/:id',                    adminCtrl.deleteAmin);
 

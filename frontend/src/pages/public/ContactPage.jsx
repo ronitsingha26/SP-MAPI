@@ -39,15 +39,16 @@ export default function ContactPage() {
           {[
             { icon: Mail, label: t('contact_email_us'), value: 'office@spmapi.co.in', sub: 'spmapi@zohomail.in', color: 'green' },
             { icon: Phone, label: t('contact_call_us'), value: '+91 7979835440', sub: '', color: 'yellow' },
-            { icon: MapPin, label: t('contact_head_office'), value: 'Madhepura, Bihar, India', sub: t('contact_branch'), color: 'green' },
-          ].map(({ icon: Icon, label, value, sub, color }) => (
-            <div key={label} className="card p-6 flex items-start gap-4">
+            { icon: MapPin, label: 'Head Office', value: 'Plot No. 432, VCT - Kumhra\nPost - Mirzapur\nDist - Araria\nBihar - 854312', sub: '', color: 'green' },
+            { icon: MapPin, label: 'Branch Office', value: 'Chaudhary Tola, Ward - 05\nVCT - Ghailarh Jiwachhpur\nNear by Hanuman Mandir\nGamharia – Baijnathpur Road\nDist - Madhepura\nBihar - 852124', sub: '', color: 'green' },
+          ].map(({ icon: Icon, label, value, sub, color }, idx) => (
+            <div key={idx} className="card p-6 flex items-start gap-4">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${color === 'green' ? 'bg-brand-green-pale' : 'bg-brand-yellow-pale'}`}>
                 <Icon className={`w-5 h-5 ${color === 'green' ? 'text-brand-green' : 'text-yellow-600'}`} />
               </div>
               <div>
                 <p className="text-xs text-brand-text-muted font-medium uppercase tracking-wide whitespace-pre-line">{label}</p>
-                <p className="font-semibold text-brand-text text-sm mt-0.5">{value}</p>
+                <p className="font-semibold text-brand-text text-sm mt-0.5 whitespace-pre-line">{value}</p>
                 {sub && <p className="text-brand-text-muted text-xs mt-0.5 whitespace-pre-line">{sub}</p>}
               </div>
             </div>

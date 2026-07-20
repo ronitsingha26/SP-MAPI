@@ -77,15 +77,15 @@ export default function AboutPage() {
                 [t('about_company_label_page'), 'SPMAPI Private Limited'],
                 [t('about_cin'), 'U74909BR2026PTC083930'],
                 [t('about_reg'), '083930'],
-                [t('about_head_office'), 'Madhepura, Bihar'],
-                [t('about_branch'), 'Across Bihar including Araria and nearby districts'],
+                [t('about_head_office'), 'Plot No. 432, VCT - Kumhra\nPost - Mirzapur\nDist - Araria\nBihar - 854312'],
+                [t('about_branch'), 'Chaudhary Tola, Ward - 05\nVCT - Ghailarh Jiwachhpur\nNear by Hanuman Mandir\nGamharia – Baijnathpur Road\nDist - Madhepura\nBihar - 852124'],
                 [t('about_website'), 'https://spmapi.co.in'],
                 [t('about_email'), 'office@spmapi.co.in'],
                 [t('about_contact_lbl'), '+91 7979835440'],
               ].map(([label, value]) => (
                 <div key={label} className="flex flex-col sm:flex-row sm:justify-between gap-1 py-3 border-b border-brand-green-pale last:border-0">
                   <span className="text-brand-text-muted font-medium w-32">{label}</span>
-                  <span className="text-brand-text font-semibold">{value}</span>
+                  <span className="text-brand-text font-semibold whitespace-pre-line sm:text-right">{value}</span>
                 </div>
               ))}
             </div>

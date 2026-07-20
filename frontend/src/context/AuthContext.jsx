@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
   const register = async ({
     name, mobile, email, password, fatherName,
     district, state, block, village, wardNumber, panchayat,
-    mouza, policeStation, pincode, address, aadhaarNumber
+    mouja, policeStation, pincode, address, aadhaarNumber
   }) => {
     setAuthLoading(true);
     try {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
         village: village || null,
         ward_number: wardNumber || null,
         panchayat: panchayat || null,
-        mouza: mouza || null,
+        mouja: mouja || null,
         police_station: policeStation || null,
         pincode: pincode || null,
         address: address || null,
@@ -86,10 +86,10 @@ export function AuthProvider({ children }) {
   };
 
   // ── Amin Login ───────────────────────────────────────────────
-  const aminLogin = async (mobile, password) => {
+  const aminLogin = async (email, password) => {
     setAuthLoading(true);
     try {
-      const res = await api.post('/auth/amin/login', { mobile, password });
+      const res = await api.post('/auth/amin/login', { email, password });
       const { token, user } = res.data;
       saveToken(token);
       setCurrentUser({ ...user, role: 'amin' });

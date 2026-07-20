@@ -123,7 +123,7 @@ class AssignmentService {
   async getAminAssignments(amin_id, status_filter = null) {
     let query = `SELECT ass.*,
                         a.app_id, a.service_type, a.applicant_name, a.applicant_mobile,
-                        a.district, a.village, a.mouza_name, a.khata_number, a.plot_number,
+                        a.district, a.village, a.mouja_name, a.khata_number, a.plot_number,
                         a.land_area, a.remarks AS app_remarks, a.status AS app_status,
                         c.name AS customer_name, c.mobile AS customer_mobile, c.address AS customer_address
                  FROM assignments ass

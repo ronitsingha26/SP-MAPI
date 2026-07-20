@@ -58,7 +58,9 @@ class ApplicationService {
       const distData = await applicationRepository.findDistrictByName(data.district);
       
       const parsedLandArea = data.land_area ? parseFloat(data.land_area) : 0;
-      const payment_required = await pricingService.calculatePrice('mapi', distData?.id, parsedLandArea);
+      const noOfDays = data.no_of_days ? parseInt(data.no_of_days) : 0;
+      
+      const payment_required = noOfDays > 0 ? noOfDays * 2500 : 0;
 
       const application = await applicationRepository.createApplication({
         ...data,
@@ -70,7 +72,8 @@ class ApplicationService {
         applicant_email: data.email,
         district_id: distData?.id,
         payment_required,
-        land_area: parsedLandArea || null
+        land_area: parsedLandArea || null,
+        no_of_days: noOfDays || null
       }, client);
 
       await this.processDocuments(files, id, data.customer_id, client);
@@ -100,7 +103,8 @@ class ApplicationService {
       const distData = await applicationRepository.findDistrictByName(data.district);
       
       const parsedLandArea = data.land_area ? parseFloat(data.land_area) : 0;
-      const payment_required = await pricingService.calculatePrice('bantwara', distData?.id, parsedLandArea);
+      const noOfDays = data.no_of_days ? parseInt(data.no_of_days) : 0;
+      const payment_required = noOfDays > 0 ? noOfDays * 2500 : 0;
 
       const application = await applicationRepository.createApplication({
         ...data,
@@ -112,7 +116,8 @@ class ApplicationService {
         applicant_email: data.email,
         district_id: distData?.id,
         payment_required,
-        land_area: parsedLandArea || null
+        land_area: parsedLandArea || null,
+        no_of_days: noOfDays || null
       }, client);
 
       await this.processDocuments(files, id, data.customer_id, client);
@@ -141,7 +146,8 @@ class ApplicationService {
       const id = uuidv4();
       const distData = await applicationRepository.findDistrictByName(data.district);
 
-      const payment_required = await pricingService.calculatePrice('map', distData?.id, 0);
+      const noOfSheets = data.no_of_sheets ? parseInt(data.no_of_sheets) : 1;
+      const payment_required = noOfSheets * 400;
 
       const application = await applicationRepository.createApplication({
         ...data,
@@ -152,7 +158,8 @@ class ApplicationService {
         applicant_mobile: data.mobile,
         applicant_email: data.email,
         district_id: distData?.id,
-        payment_required
+        payment_required,
+        no_of_sheets: noOfSheets
       }, client);
 
       await this.processDocuments(files, id, data.customer_id, client);

@@ -130,13 +130,13 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/apply-amin" element={<AminApplicationPage />} />
+            <Route path="/apply-amin/success" element={<AminApplicationSuccessPage />} />
           </Route>
 
           {/* ── Auth Routes (Login / Register) ── */}
           <Route path="/login" element={<AuthRoute><CustomerLoginPage /></AuthRoute>} />
           <Route path="/register" element={<AuthRoute><CustomerRegisterPage /></AuthRoute>} />
-          <Route path="/apply-amin" element={<AuthRoute><AminApplicationPage /></AuthRoute>} />
-          <Route path="/apply-amin/success" element={<AminApplicationSuccessPage />} />
           <Route path="/admin/login" element={<AuthRoute><AdminLoginPage /></AuthRoute>} />
           <Route path="/amin/login" element={<AuthRoute><AminLoginPage /></AuthRoute>} />
           <Route path="/superadmin/login" element={<Navigate to="/admin/login" replace />} />

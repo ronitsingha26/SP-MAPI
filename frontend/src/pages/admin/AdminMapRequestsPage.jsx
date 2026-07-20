@@ -192,10 +192,15 @@ export default function AdminMapRequestsPage() {
                       <tr key={`${app.id}-exp`} className="bg-blue-50/40">
                         <td colSpan="7" className="p-4">
                           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+                            <div><span className="text-brand-text-muted text-xs">Area Type</span><p className="font-medium">{app.area_type || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Map Type</span><p className="font-medium font-mono">{app.map_type || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Thana/Municipal</span><p className="font-medium">{app.thana_municipal || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Mauja/Ward</span><p className="font-medium">{app.mouja_ward || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Sheets</span><p className="font-medium">{app.no_of_sheets || '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Amount</span><p className="font-bold text-brand-green">₹{app.payment_required ? Number(app.payment_required).toLocaleString() : '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">Payment Status</span><p className="font-medium capitalize">{app.payment_status || '—'}</p></div>
                             <div><span className="text-brand-text-muted text-xs">Email</span><p className="font-medium">{app.applicant_email || '—'}</p></div>
-                            <div><span className="text-brand-text-muted text-xs">Payment</span><p className="font-medium capitalize">{app.payment_status || '—'}</p></div>
-                            <div><span className="text-brand-text-muted text-xs">Service</span><p className="font-medium">Map Copy</p></div>
-                            <div><span className="text-brand-text-muted text-xs">Updated</span><p className="font-medium">{app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-IN') : '—'}</p></div>
+                            <div><span className="text-brand-text-muted text-xs">State</span><p className="font-medium">{app.state || '—'}</p></div>
                             <AminReportsViewer documents={app.documents || []} />
                           </div>
                           <ApplicationDocumentsViewer documents={app.documents || []} />

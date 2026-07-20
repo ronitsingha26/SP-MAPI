@@ -41,8 +41,8 @@ exports.adminLogin = async (req, res, next) => {
 
 exports.aminLogin = async (req, res, next) => {
   try {
-    const { mobile, password } = req.body;
-    const { token, user } = await authService.aminLogin(mobile, password);
+    const { email, password } = req.body;
+    const { token, user } = await authService.aminLogin(email, password);
     return res.json({ success: true, message: 'Amin login successful.', token, user });
   } catch (err) {
     next(err);

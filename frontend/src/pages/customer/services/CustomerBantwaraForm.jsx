@@ -48,9 +48,9 @@ export default function CustomerBantwaraForm() {
     villageId: '', villageName: currentUser?.village || '',
     policeStation: currentUser?.police_station || '',
     wardName: currentUser?.ward_number || '',
-    moujaName: currentUser?.mouza || '',
+    moujaName: currentUser?.mouja || '',
     khataNumber: '', pincode: currentUser?.pincode || '',
-    landArea: '', courtCaseNumber: '', vanshawaliDetails: '',
+    landArea: '', noOfDays: '', courtCaseNumber: '', vanshawaliDetails: '',
     aadhaarFront: null, aadhaarBack: null, khatiyan: null, vanshawali: null,
   });
 
@@ -77,7 +77,7 @@ export default function CustomerBantwaraForm() {
   }, [form.state, statesList]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const estimatedPrice = form.landArea ? (Number(form.landArea) * 5).toLocaleString() : '0';
+  const estimatedPrice = form.noOfDays ? (Number(form.noOfDays) * 2500).toLocaleString() : '0';
 
   const handleSubmit = async () => {
     if (!form.aadhaarFront || !form.aadhaarBack || !form.khatiyan) {
@@ -92,7 +92,7 @@ export default function CustomerBantwaraForm() {
       formData.append('mobile', currentUser.mobile);
       if (currentUser.email) formData.append('email', currentUser.email);
       formData.append('father_name', currentUser.father_name || '');
-      const fields = { state: form.state, district: form.districtName, panchayat: form.panchayatName, police_station: form.policeStation, village: form.villageName, ward_name: form.wardName, mouja_name: form.moujaName, khata_number: form.khataNumber, block_name: form.blockName, pincode: form.pincode, land_area: form.landArea, court_case_number: form.courtCaseNumber, vanshawali_details: form.vanshawaliDetails };
+      const fields = { state: form.state, district: form.districtName, panchayat: form.panchayatName, police_station: form.policeStation, village: form.villageName, ward_name: form.wardName, mouja_name: form.moujaName, khata_number: form.khataNumber, block_name: form.blockName, pincode: form.pincode, land_area: form.landArea, no_of_days: form.noOfDays, court_case_number: form.courtCaseNumber, vanshawali_details: form.vanshawaliDetails };
       Object.entries(fields).forEach(([k, v]) => { if (v) formData.append(k, v); });
       formData.append('aadhaar_front', form.aadhaarFront);
       formData.append('aadhaar_back', form.aadhaarBack);
@@ -183,18 +183,19 @@ export default function CustomerBantwaraForm() {
               <FormField label="Mouja Name"><input className="input" placeholder="Mouja name or number" value={form.moujaName} onChange={e => set('moujaName', e.target.value)} /></FormField>
               <FormField label="Khata Number"><input className="input" placeholder="Khata number" value={form.khataNumber} onChange={e => set('khataNumber', e.target.value)} /></FormField>
               <FormField label="Pincode" required><input className="input" placeholder="6-digit pincode" maxLength={6} value={form.pincode} onChange={e => set('pincode', e.target.value.replace(/\D/g, ''))} /></FormField>
-              <FormField label="Land Area (sq. ft.)" required><input className="input" type="number" min="0" placeholder="Total land area" value={form.landArea} onChange={e => set('landArea', e.target.value)} /></FormField>
+              <FormField label="Land Area (sq. ft.)"><input className="input" type="number" min="0" placeholder="Total land area (optional)" value={form.landArea} onChange={e => set('landArea', e.target.value)} /></FormField>
+              <FormField label="Number of Days for Amin" required><input className="input" type="number" min="1" placeholder="Enter number of days" value={form.noOfDays} onChange={e => set('noOfDays', e.target.value)} /></FormField>
               <FormField label="Court Case Number (if any)"><input className="input" placeholder="Case number if applicable" value={form.courtCaseNumber} onChange={e => set('courtCaseNumber', e.target.value)} /></FormField>
-              {form.landArea && (
-                <div className="sm:col-span-2 bg-brand-yellow-pale rounded-xl p-4">
+              {form.noOfDays && (
+                <div className="sm:col-span-2 bg-brand-green-pale rounded-xl p-4">
                   <p className="text-sm text-brand-text-muted">Estimated Cost</p>
-                  <p className="text-2xl font-bold text-yellow-600">₹{estimatedPrice}</p>
-                  <p className="text-xs text-brand-text-muted">@ ₹5 per sq. ft.</p>
+                  <p className="text-2xl font-bold text-brand-green">₹{estimatedPrice}</p>
+                  <p className="text-xs text-brand-text-muted">@ ₹2,500 per day</p>
                 </div>
               )}
             </div>
             <button className="btn-primary w-full justify-center mt-4"
-              onClick={() => { if (!form.districtName) { setError('Please select a district'); } else if(!form.blockName) { setError('Please select a block'); } else if(!form.landArea) { setError('Please enter total land area'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
+              onClick={() => { if (!form.districtName) { setError('Please select a district'); } else if(!form.blockName) { setError('Please select a block'); } else if(!form.noOfDays) { setError('Please enter number of days'); } else { setError(''); setStep(2); window.scrollTo(0,0); } }}>
               Next: Upload Documents <ChevronRight className="w-4 h-4" />
             </button>
           </div>

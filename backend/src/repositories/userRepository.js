@@ -15,7 +15,7 @@ class UserRepository {
     const {
       id, name, father_name, mobile, email, password_hash,
       state, district, block, village, ward_number, panchayat,
-      mouza, police_station, pincode, address, aadhaar_number
+      mouja, police_station, pincode, address, aadhaar_number
     } = customerData;
 
     const customer_id_display = await this.generateCustomerDisplayId();
@@ -24,12 +24,12 @@ class UserRepository {
       `INSERT INTO customers
          (id, customer_id_display, name, father_name, mobile, email, password_hash,
           state, district, block, village, ward_number, panchayat,
-          mouza, police_station, pincode, address, aadhaar_number)
+          mouja, police_station, pincode, address, aadhaar_number)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         id, customer_id_display, name, father_name || null, mobile, email || null, password_hash,
         state || 'Bihar', district || null, block || null, village || null,
-        ward_number || null, panchayat || null, mouza || null,
+        ward_number || null, panchayat || null, mouja || null,
         police_station || null, pincode || null, address || null, aadhaar_number || null
       ]
     );
@@ -37,7 +37,7 @@ class UserRepository {
     const result = await pool.query(
       `SELECT id, customer_id_display, name, father_name, mobile, email,
               state, district, block, village, ward_number, panchayat,
-              mouza, police_station, pincode, address,
+              mouja, police_station, pincode, address,
               status, profile_photo_url, created_at
        FROM customers WHERE id = ?`,
       [id]
@@ -50,7 +50,7 @@ class UserRepository {
     const result = await pool.query(
       `SELECT id, customer_id_display, name, father_name, mobile, email, aadhaar_number,
               state, district, block, village, ward_number, panchayat,
-              mouza, police_station, pincode, address,
+              mouja, police_station, pincode, address,
               status, profile_photo_url, is_email_verified, is_mobile_verified,
               created_at, updated_at
        FROM customers WHERE id = ? AND deleted_at IS NULL`,
@@ -65,7 +65,7 @@ class UserRepository {
     const values = [];
     const allowed = [
       'name', 'father_name', 'email', 'state', 'district', 'block',
-      'village', 'ward_number', 'panchayat', 'mouza', 'police_station',
+      'village', 'ward_number', 'panchayat', 'mouja', 'police_station',
       'pincode', 'address', 'profile_photo_url'
     ];
     for (const key of allowed) {
@@ -119,13 +119,13 @@ class UserRepository {
     return result.rows[0];
   }
 
-  async findAminByMobile(mobile) {
+  async findAminByEmail(email) {
     const result = await pool.query(
       `SELECT a.*, d.name AS district_name_full
        FROM amins a
        LEFT JOIN districts d ON a.district_id = d.id
-       WHERE a.mobile = ? AND a.deleted_at IS NULL AND a.status = 'active'`,
-      [mobile]
+       WHERE a.email = ? AND a.deleted_at IS NULL AND a.status = 'active'`,
+      [email]
     );
     return result.rows[0];
   }

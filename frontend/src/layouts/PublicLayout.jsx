@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import FloatingSocials from '../components/layout/FloatingSocials';
 
 export default function PublicLayout() {
   // Public site is now accessible to everyone — logged-in users see "Dashboard" button in navbar
@@ -11,6 +12,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <FloatingSocials />
     </div>
   );
 }

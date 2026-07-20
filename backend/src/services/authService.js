@@ -12,7 +12,7 @@ class AuthService {
     const {
       name, father_name, mobile, email, password,
       state, district, block, village, ward_number, panchayat,
-      mouza, police_station, pincode, address, aadhaar_number
+      mouja, police_station, pincode, address, aadhaar_number
     } = data;
     const password_hash = await bcrypt.hash(password, 12);
     const id = uuidv4();
@@ -20,7 +20,7 @@ class AuthService {
     const user = await userRepository.createCustomer({
       id, name, father_name, mobile, email, password_hash,
       state, district, block, village, ward_number, panchayat,
-      mouza, police_station, pincode, address, aadhaar_number
+      mouja, police_station, pincode, address, aadhaar_number
     });
 
     const token = signToken({ id: user.id, role: 'customer', name: user.name, email: user.email });
@@ -75,15 +75,15 @@ class AuthService {
     return { token, user: { ...safeAdmin, role: 'admin' }, type: 'Admin' };
   }
 
-  async aminLogin(mobile, password) {
-    const amin = await userRepository.findAminByMobile(mobile);
+  async aminLogin(email, password) {
+    const amin = await userRepository.findAminByEmail(email);
     if (!amin) throw new AppError('Invalid credentials.', 401);
 
     const match = await bcrypt.compare(password, amin.password_hash);
     if (!match) throw new AppError('Invalid credentials.', 401);
 
     await userRepository.updateLastLogin('amins', amin.id);
-    const token = signToken({ id: amin.id, role: 'amin', name: amin.name, mobile: amin.mobile });
+    const token = signToken({ id: amin.id, role: 'amin', name: amin.name, email: amin.email });
     const { password_hash, ...safeAmin } = amin;
     return { token, user: { ...safeAmin, role: 'amin' } };
   }
@@ -106,7 +106,7 @@ class AuthService {
       result = await pool.query(
         `SELECT id, customer_id_display, name, father_name, mobile, email,
                 state, district, block, village, ward_number, panchayat,
-                mouza, police_station, pincode, address,
+                mouja, police_station, pincode, address,
                 status, is_email_verified, is_mobile_verified,
                 profile_photo_url, primary_app_id, created_at
          FROM customers WHERE id=?`,

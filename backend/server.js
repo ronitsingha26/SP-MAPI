@@ -128,10 +128,19 @@ app.get('*', (req, res) => {
 app.use(errorHandler);
 
 // ── Start Server ──────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 SP MAPI Backend running on http://localhost:${PORT}`);
-  console.log(`   Environment : ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   API Base URL: http://localhost:${PORT}/api\n`);
-});
+const startup = require('./src/startup');
+
+startup.runAll()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n🚀 SP MAPI Backend running on http://localhost:${PORT}`);
+      console.log(`   Environment : ${process.env.NODE_ENV || 'development'}`);
+      console.log(`   API Base URL: http://localhost:${PORT}/api\n`);
+    });
+  })
+  .catch((err) => {
+    console.error('CRITICAL: Startup sequence failed!', err);
+    process.exit(1);
+  });
 
 module.exports = app;

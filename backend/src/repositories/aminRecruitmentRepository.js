@@ -3,14 +3,14 @@ const { v4: uuidv4 } = require('uuid');
 
 exports.createAminApplication = async (data) => {
   const {
-    app_id, name, father_name, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years, previous_organization, documents
+    app_id, name, father_name, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years, previous_organization, documents, password_hash
   } = data;
   const id = uuidv4();
 
   await pool.query(
-    `INSERT INTO amin_applications (id, app_id, name, father_name, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years, previous_organization, documents)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, app_id, name, father_name || null, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years || 0, previous_organization || null, JSON.stringify(documents)]
+    `INSERT INTO amin_applications (id, app_id, name, father_name, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years, previous_organization, documents, password_hash)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, app_id, name, father_name || null, mobile, email, dob, gender, state, district, block_name, village, pin_code, highest_qualification, experience_years || 0, previous_organization || null, JSON.stringify(documents), password_hash || null]
   );
 
   return { id, app_id };

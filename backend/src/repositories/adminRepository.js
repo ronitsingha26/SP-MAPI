@@ -120,11 +120,13 @@ class AdminRepository {
     const result = await pool.query(
       `SELECT a.id, a.app_id, a.service_type, a.applicant_name, a.applicant_mobile,
               a.district, a.block_id, a.status, a.payment_status, a.created_at, a.applicant_email,
-              a.updated_at, am.name AS amin_name
+              a.updated_at, a.payment_required, a.state,
+              a.area_type, a.map_type, a.thana_municipal, a.mouja_ward, a.no_of_sheets,
+              am.name AS amin_name
        FROM (
-         SELECT id, app_id, service_type, applicant_name, applicant_mobile, district, block_id, status, payment_status, created_at, applicant_email, updated_at, assigned_amin_id, deleted_at FROM applications
+         SELECT id, app_id, service_type, applicant_name, applicant_mobile, district, block_id, status, payment_status, created_at, applicant_email, updated_at, assigned_amin_id, deleted_at, payment_required, state, area_type, map_type, thana_municipal, mouja_ward, no_of_sheets FROM applications
          UNION ALL
-         SELECT tr.id, tr.app_id, 'Tool Order' AS service_type, c.name AS applicant_name, c.mobile AS applicant_mobile, c.district, NULL AS block_id, tr.status, NULL AS payment_status, tr.created_at, c.email AS applicant_email, tr.updated_at, tr.processed_by AS assigned_amin_id, NULL AS deleted_at
+         SELECT tr.id, tr.app_id, 'Tool Order' AS service_type, c.name AS applicant_name, c.mobile AS applicant_mobile, c.district, NULL AS block_id, tr.status, NULL AS payment_status, tr.created_at, c.email AS applicant_email, tr.updated_at, tr.processed_by AS assigned_amin_id, NULL AS deleted_at, NULL AS payment_required, NULL AS state, NULL AS area_type, NULL AS map_type, NULL AS thana_municipal, NULL AS mouja_ward, NULL AS no_of_sheets
          FROM tool_requests tr JOIN customers c ON tr.customer_id = c.id
        ) a
        LEFT JOIN amins am ON a.assigned_amin_id = am.id

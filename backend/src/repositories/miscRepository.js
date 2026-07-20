@@ -22,7 +22,7 @@ class MiscRepository {
     const result = await pool.query(
       `SELECT id, customer_id_display, name, father_name, mobile, email,
               state, district, block, village, ward_number, panchayat,
-              mouza, police_station, pincode, address,
+              mouja, police_station, pincode, address,
               status, is_email_verified, is_mobile_verified,
               profile_photo_url, primary_app_id, created_at
        FROM customers WHERE id=? AND deleted_at IS NULL`,
@@ -34,7 +34,7 @@ class MiscRepository {
   async updateCustomerProfile(customerId, data) {
     const allowed = [
       'name', 'father_name', 'email', 'state', 'district', 'block',
-      'village', 'ward_number', 'panchayat', 'mouza', 'police_station',
+      'village', 'ward_number', 'panchayat', 'mouja', 'police_station',
       'pincode', 'address', 'profile_photo_url'
     ];
     const sets = [];

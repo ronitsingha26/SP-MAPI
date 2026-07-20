@@ -10,7 +10,7 @@ export default function AminApplicationPage() {
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
-    name: '', father_name: '', mobile: '', email: '', dob: '', gender: 'Male',
+    name: '', father_name: '', mobile: '', email: '', password: '', dob: '', gender: 'Male',
     state: '', district: '', block_name: '', village: '', pin_code: '',
     highest_qualification: '', experience_years: 0, previous_organization: ''
   });
@@ -114,8 +114,8 @@ export default function AminApplicationPage() {
   return (
     <div className="min-h-screen bg-brand-cream py-12 px-4 sm:px-6 animate-fade-in">
       <div className="max-w-4xl mx-auto">
-        <Link to="/login" className="inline-flex items-center gap-2 text-sm text-brand-text font-semibold hover:text-brand-green mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back to Login
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-brand-text font-semibold hover:text-brand-green mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
 
         <div className="bg-white rounded-3xl shadow-soft p-6 sm:p-10 border border-gray-100">
@@ -146,11 +146,15 @@ export default function AminApplicationPage() {
                 </div>
                 <div>
                   <label className="label">Mobile Number <span className="text-red-500">*</span></label>
-                  <input type="text" name="mobile" required className="input" value={formData.mobile} onChange={handleInputChange} />
+                  <input type="tel" name="mobile" required className="input" maxLength="10" pattern="[0-9]{10}" title="Mobile number must be exactly 10 digits" value={formData.mobile} onChange={handleInputChange} onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} />
                 </div>
                 <div>
                   <label className="label">Email <span className="text-red-500">*</span></label>
                   <input type="email" name="email" required className="input" value={formData.email} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label className="label">Create Password <span className="text-red-500">*</span></label>
+                  <input type="password" name="password" required className="input" value={formData.password} onChange={handleInputChange} />
                 </div>
                 <div>
                   <label className="label">Date of Birth <span className="text-red-500">*</span></label>

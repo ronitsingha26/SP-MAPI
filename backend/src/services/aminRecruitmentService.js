@@ -80,6 +80,33 @@ exports.reviewApplication = async (id, status, admin_remark) => {
   }
 
   await repository.updateApplicationStatus(id, status, admin_remark);
+
+  if (status === 'approved') {
+    // Look up the district ID
+    const appRepoInstance = require('../repositories/applicationRepository');
+    let district_id = null;
+    const distRecord = await appRepoInstance.findDistrictByName(app.district);
+    if (distRecord) district_id = distRecord.id;
+
+    // Insert into amins table
+    const adminRepoInstance = require('../repositories/adminRepository');
+    const { v4: uuidv4 } = require('uuid');
+    
+    // license number can be generated or just left null, we'll generate one
+    const license_number = `LIC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    await adminRepoInstance.createAmin(
+      uuidv4(),
+      app.name,
+      app.mobile,
+      app.email,
+      app.password_hash || null,
+      district_id,
+      app.district,
+      license_number,
+      null // created_by admin id (we don't pass it here currently)
+    );
+  }
   
   return { success: true, message: `Application ${status} successfully.` };
 };

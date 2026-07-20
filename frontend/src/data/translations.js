@@ -393,7 +393,7 @@ const translations = {
   footer_copyright: { en: '© 2026 SP MAPI. All rights reserved.', hi: '© 2026 SP MAPI. सर्वाधिकार सुरक्षित।' },
   footer_privacy: { en: 'Privacy Policy', hi: 'गोपनीयता नीति' },
   footer_terms: { en: 'Terms of Service', hi: 'सेवा की शर्तें' },
-  footer_head_office: { en: 'Head Office: Madhepura, Bihar, India', hi: 'प्रधान कार्यालय: मधेपुरा, बिहार, भारत' },
+  footer_head_office: { en: 'Head Office: Plot No. 432, VCT - Kumhra, Post - Mirzapur, Dist - Araria, Bihar - 854312', hi: 'प्रधान कार्यालय: प्लॉट नं. 432, VCT - कुम्हरा, पोस्ट - मिर्जापुर, जिला - अररिया, बिहार - 854312' },
 
   // ══════════════════════════════════════════
   // REQUEST STATUS CHECK
@@ -570,7 +570,7 @@ Object.assign(translations, {
   footer_map: { en: 'Map Request & Survey Support', hi: 'नक्शा एवं सर्वे सहायता' },
   footer_boundary: { en: 'Property Boundary Verification', hi: 'भूमि सीमा सत्यापन' },
   footer_browse: { en: 'Pending Applications', hi: 'लंबित आवेदन' },
-  footer_head_office: { en: 'Head Office: Madhepura, Bihar', hi: 'मुख्य कार्यालय: मधेपुरा, बिहार' },
+  footer_head_office: { en: 'Head Office: Plot No. 432, VCT - Kumhra, Post - Mirzapur, Dist - Araria, Bihar - 854312', hi: 'मुख्य कार्यालय: प्लॉट नं. 432, VCT - कुम्हरा, पोस्ट - मिर्जापुर, जिला - अररिया, बिहार - 854312' },
 
   request_title: { en: 'Search Application Status', hi: 'आवेदन स्थिति खोजें' },
   request_subtitle: {

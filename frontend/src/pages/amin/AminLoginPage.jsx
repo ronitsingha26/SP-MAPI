@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { RefreshCw, Lock, Phone, Compass, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Lock, Phone, Compass, ArrowLeft, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AminLoginPage() {
-  const [form, setForm] = useState({ mobile: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export default function AminLoginPage() {
     setLoading(true);
     setError('');
     try {
-      await aminLogin(form.mobile, form.password);
+      await aminLogin(form.email, form.password);
       navigate('/amin/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials.');
@@ -49,10 +49,10 @@ export default function AminLoginPage() {
 
           <form onSubmit={handle} className="space-y-5">
             <div>
-              <label className="label">Mobile Number</label>
+              <label className="label">Email Address</label>
               <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
-                <input className="input pl-10" type="tel" placeholder="9876543210" required value={form.mobile} onChange={e => setForm({...form, mobile: e.target.value})} />
+                <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input className="input pl-10" type="email" placeholder="youremail@example.com" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
               </div>
             </div>
             <div>
